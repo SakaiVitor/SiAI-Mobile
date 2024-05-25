@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2D3E3F"
+    tools:context="com.labprog.siai.RegisterActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cadastro"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/register_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nome"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nome de Guerra"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_registration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Matrícula"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_class"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Turma"
+            android:inputType="number"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_platoon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pelotão"
+            android:inputType="number"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/register_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Senha"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:id="@+id/strengthMeter"
+            android:layout_marginBottom="16dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Força da senha: "
+                android:textColor="#FFFFFF"
+                android:id="@+id/strengthText"/>
+            <LinearLayout
+                android:id="@+id/strengthBar"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:background="#808080"
+                android:layout_marginTop="4dp">
+                <View
+                    android:id="@+id/strengthBarFill"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="#FF0000"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cadastrar"
+            android:background="#FFEB3B"
+            android:textColor="#000000"
+            android:padding="10dp"
+            android:layout_marginBottom="16dp"
+            android:onClick="onRegisterClicked"/>
+    </LinearLayout>
+</ScrollView>
