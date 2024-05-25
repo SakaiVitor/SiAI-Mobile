@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.exercicion_labprogiii.R;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.example.exercicion_labprogiii.R.layout.activity_register);
+        setContentView(com.labprog.siai.R.layout.activity_register);
 
         nameEditText = findViewById(R.id.register_name);
         nicknameEditText = findViewById(R.id.register_nickname);

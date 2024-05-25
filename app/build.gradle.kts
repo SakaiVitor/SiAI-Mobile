@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.exercicion_labprogiii"
+    namespace = "com.labprog.siai"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.exercicion_labprogiii"
+        applicationId = "com.labprog.siai"
         minSdk = 34
         targetSdk = 34
         versionCode = 1
