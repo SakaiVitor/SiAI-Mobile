@@ -19,6 +19,9 @@
         tools:ignore="ExtraText">
 
         <activity android:name="com.labprog.siai.RegisterActivity"></activity>
+        <activity android:name="com.labprog.siai.ArranchamentoActivity"></activity>
+        <activity android:name="com.labprog.siai.ExportarActivity"></activity>
+        <activity android:name="com.labprog.siai.MenuActivity"></activity>
         <activity
             android:name="com.labprog.siai.LoginActivity"
             android:exported="true">

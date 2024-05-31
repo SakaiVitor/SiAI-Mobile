@@ -3,91 +3,78 @@ package com.labprog.siai;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import org.json.JSONObject;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText emailEditText;
-    private EditText passwordEditText;
+    private EditText emailField;
+    private EditText passwordField;
     private Button loginButton;
-    private ProgressBar loader;
-    private TextView registerLink;
-    private static final String TAG = "LoginActivity";
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        emailEditText = findViewById(R.id.email);
-        passwordEditText = findViewById(R.id.password);
+        emailField = findViewById(R.id.email);
+        passwordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.login_button);
-        loader = findViewById(R.id.loader);
-        registerLink = findViewById(R.id.register_link);
+        apiService = ApiClient.getClient().create(ApiService.class);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser();
+        loginButton.setOnClickListener(v -> {
+            String email = emailField.getText().toString();
+            String password = passwordField.getText().toString();
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
+                return;
             }
-        });
-
-        registerLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navegar para a tela de cadastro
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
+            login(email, password);
         });
     }
 
-    private void loginUser() {
-        String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(LoginActivity.this, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        loader.setVisibility(View.VISIBLE);
-        loginButton.setEnabled(false);
-
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<Usuario> call = apiService.login(email, password);
-        call.enqueue(new Callback<Usuario>() {
+    private void login(String email, String password) {
+        Call<ResponseBody> call = apiService.login(email, password, "true");
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<Usuario> call, Response<Usuario> response) {
-                loader.setVisibility(View.GONE);
-                loginButton.setEnabled(true);
-
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Usuario usuario = response.body();
-                    Log.d(TAG, "Login bem-sucedido: " + usuario.getEmail());
-                    Toast.makeText(LoginActivity.this, "Login bem-sucedido", Toast.LENGTH_SHORT).show();
-                    // Navegar para a próxima Activity ou salvar informações do usuário
+                    try {
+                        String jsonResponse = response.body().string();
+                        JSONObject jsonObject = new JSONObject(jsonResponse);
+                        Usuario usuario = new Usuario(
+                                jsonObject.getJSONObject("usuario").getString("nome"),
+                                jsonObject.getJSONObject("usuario").getString("email")
+                        );
+                        String sessionId = jsonObject.getString("sessionId");
+
+                        Toast.makeText(LoginActivity.this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show();
+                        // Redirecionar para MenuActivity
+                        Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                        intent.putExtra("sessionId", sessionId);
+                        startActivity(intent);
+                        finish();
+                    } catch (Exception e) {
+                        Log.e("LoginActivity", "Erro ao processar JSON", e);
+                        Toast.makeText(LoginActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Log.d(TAG, "Falha no login: " + response.message());
-                    Toast.makeText(LoginActivity.this, "Falha no login", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Falha no login: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Usuario> call, Throwable t) {
-                loader.setVisibility(View.GONE);
-                loginButton.setEnabled(true);
-                Log.e(TAG, "Erro de comunicação: ", t);
-                Toast.makeText(LoginActivity.this, "Erro de comunicação", Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("LoginActivity", "Erro: " + t.getMessage());
+                Toast.makeText(LoginActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
             }
         });
     }

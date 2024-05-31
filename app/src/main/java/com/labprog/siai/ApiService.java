@@ -1,14 +1,18 @@
 package com.labprog.siai;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public interface ApiService {
+
     @FormUrlEncoded
     @POST("loginServlet")
-    Call<Usuario> login(@Field("email") String email, @Field("password") String password);
+    Call<ResponseBody> login(@Field("email") String email, @Field("password") String password, @Field("fromApp") String fromApp);
 
     @FormUrlEncoded
     @POST("cadastro")
@@ -21,4 +25,7 @@ public interface ApiService {
             @Field("email") String email,
             @Field("password") String senha
     );
+
+    @GET("menuServlet")
+    Call<ResponseBody> getMenuData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
 }
