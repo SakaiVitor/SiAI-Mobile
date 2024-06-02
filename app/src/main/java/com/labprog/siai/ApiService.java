@@ -28,4 +28,12 @@ public interface ApiService {
 
     @GET("menuServlet")
     Call<ResponseBody> getMenuData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
+
+    @FormUrlEncoded
+    @POST("arranchamento")
+    Call<ResponseBody> enviarArranchamento(@Field("arranchamento[]") String[] arranchamentos, @Field("fromApp") String fromApp);
+
+    @GET("arranchamento")
+    Call<ResponseBody> getArranchamentoData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
 }
+
