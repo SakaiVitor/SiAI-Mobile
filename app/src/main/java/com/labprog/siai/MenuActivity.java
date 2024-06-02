@@ -1,15 +1,28 @@
 package com.labprog.siai;
 
+import static android.app.ProgressDialog.show;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import okhttp3.ResponseBody;
@@ -25,6 +38,10 @@ public class MenuActivity extends AppCompatActivity {
     private String sessionId;
     private Button logoutButton, preencherButton, exportarButton;
 
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,16 +49,39 @@ public class MenuActivity extends AppCompatActivity {
 
         tableLayout = findViewById(R.id.tableLayout);
         loadingTextView = findViewById(R.id.loadingTextView);
-        logoutButton = findViewById(R.id.logoutButton);
-        preencherButton = findViewById(R.id.preencherButton);
-        exportarButton = findViewById(R.id.exportarButton);
+        //logoutButton = findViewById(R.id.logoutButton);
+        //preencherButton = findViewById(R.id.preencherButton);
+        //exportarButton = findViewById(R.id.exportarButton);
         apiService = ApiClient.getClient().create(ApiService.class);
 
         sessionId = getIntent().getStringExtra("sessionId");
 
-        logoutButton.setOnClickListener(v -> logout());
-        preencherButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class)));
-        exportarButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ExportarActivity.class)));
+        //logoutButton.setOnClickListener(v -> logout());
+        //preencherButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class)));
+        //exportarButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ExportarActivity.class)));
+
+        //getMenuData();
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            if(item.getItemId()==R.id.itemPreencher){
+                startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
+            } else if (item.getItemId()==R.id.itemExportar) {
+                startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
+            }else if(item.getItemId()==R.id.itemSair){
+                logout();
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
 
         getMenuData();
     }
@@ -105,7 +145,23 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_principal,menu);
 
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NotNull MenuItem item){
+        if(item.getItemId()==R.id.itemPreencher){
+            startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
+        } else if (item.getItemId()==R.id.itemExportar) {
+            startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
+        }else if(item.getItemId()==R.id.itemSair){
+            logout();
+        }
+        return super.onOptionsItemSelected(item);
+    }
     private void logout() {
         // Limpar sessão ou qualquer dado de login aqui
         Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
