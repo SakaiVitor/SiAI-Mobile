@@ -2,47 +2,47 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#2D3E3F"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#1e352e">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Guerreiros Mais Arranchados"
-        android:textSize="24sp"
-        android:textColor="#f3ecd6"
-        android:textStyle="bold"
-        android:gravity="center"
         android:layout_marginBottom="16dp"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="Guerreiros Mais Arranchados"
+        android:textColor="#f3ecd6"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginBottom="16dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/logoutButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sair"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:text="Sair" />
 
         <Button
             android:id="@+id/preencherButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Preencher Arranchamento"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:text="Preencher Arranchamento" />
 
         <Button
             android:id="@+id/exportarButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Exportar Arranchamento"/>
+            android:text="Exportar Arranchamento" />
     </LinearLayout>
 
     <ScrollView
@@ -57,22 +57,24 @@
             android:stretchColumns="1">
 
             <TableRow>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="#488273"
+                    android:padding="8dp"
                     android:text="Nome de Guerra"
                     android:textColor="#ffffff"
-                    android:background="#488273"
-                    android:padding="8dp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Número de Arranchamentos"
-                    android:textColor="#ffffff"
                     android:background="#488273"
                     android:padding="8dp"
-                    android:textStyle="bold"/>
+                    android:text="Número de Arranchamentos"
+                    android:textColor="#ffffff"
+                    android:textStyle="bold" />
             </TableRow>
         </TableLayout>
     </ScrollView>
@@ -81,11 +83,11 @@
         android:id="@+id/loadingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Carregando..."
-        android:textSize="24sp"
-        android:textColor="#f3ecd6"
-        android:gravity="center"
         android:layout_marginTop="16dp"
-        android:visibility="visible"/>
+        android:gravity="center"
+        android:text="Carregando..."
+        android:textColor="#f3ecd6"
+        android:textSize="24sp"
+        android:visibility="visible" />
 
 </LinearLayout>

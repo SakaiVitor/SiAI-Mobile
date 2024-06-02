@@ -1,10 +1,12 @@
 package com.labprog.siai;
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
@@ -39,6 +41,8 @@ public class LoginActivity extends AppCompatActivity {
             }
             login(email, password);
         });
+        TextView registerLink = findViewById(R.id.register_link);
+        registerLink.setPaintFlags(registerLink.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
     }
 
     private void login(String email, String password) {
