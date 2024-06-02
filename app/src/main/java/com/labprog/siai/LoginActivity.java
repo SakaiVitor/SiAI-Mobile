@@ -41,8 +41,6 @@ public class LoginActivity extends AppCompatActivity {
             }
             login(email, password);
         });
-        TextView registerLink = findViewById(R.id.register_link);
-        registerLink.setPaintFlags(registerLink.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
     }
 
     private void login(String email, String password) {
