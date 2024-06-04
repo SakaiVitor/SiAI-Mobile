@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,12 +13,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -27,24 +30,27 @@ import retrofit2.Response;
 public class ArranchamentoActivity extends AppCompatActivity {
 
     private ApiService apiService;
-    private LinearLayout daysContainer;
+    private LinearLayout weeksContainer;
     private String sessionId;
     private View loader;
-    private JSONArray arranchamentoData; // Variável para armazenar os dados de arranchamento
+    private Map<String, Boolean> checkboxStates = new HashMap<>();
+    private Calendar calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_arranchamento);
 
-        daysContainer = findViewById(R.id.daysContainer);
+        weeksContainer = findViewById(R.id.weeksContainer);
         Button enviarButton = findViewById(R.id.enviarButton);
-        Button loadMoreButton = findViewById(R.id.exibirMaisButton); // Botão para carregar mais semanas
+        Button exibirMaisButton = findViewById(R.id.exibirMaisButton);
         loader = findViewById(R.id.loader);
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        sessionId = getIntent().getStringExtra("sessionId");
+        calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        calendar.add(Calendar.WEEK_OF_YEAR, 2);
 
         carregarDados();
 
@@ -55,10 +61,10 @@ public class ArranchamentoActivity extends AppCompatActivity {
             }
         });
 
-        loadMoreButton.setOnClickListener(new View.OnClickListener() {
+        exibirMaisButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadMoreWeeks();
+                carregarProximaSemana();
             }
         });
     }
@@ -71,9 +77,16 @@ public class ArranchamentoActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
-                        Log.d("ArranchamentoActivity", "JSON Response: " + jsonResponse);
-                        arranchamentoData = new JSONArray(jsonResponse); // Armazena os dados recebidos
-                        renderizarDias(arranchamentoData);
+                        JSONArray jsonArray = new JSONArray(jsonResponse);
+                        Map<String, Boolean> arranchadosMap = new HashMap<>();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            String date = obj.getString("data");
+                            String meal = obj.getString("refeicao").toLowerCase(Locale.ROOT);
+                            String key = date + "_" + meal;
+                            arranchadosMap.put(key, true);
+                        }
+                        renderizarDias(arranchadosMap);
                     } catch (Exception e) {
                         Log.e("ArranchamentoActivity", "Erro ao processar JSON", e);
                     }
@@ -90,140 +103,122 @@ public class ArranchamentoActivity extends AppCompatActivity {
         });
     }
 
-    private void renderizarDias(JSONArray jsonArray) {
-        String[] meals = {"cafe", "almoco", "janta", "ceia"};
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.add(Calendar.WEEK_OF_YEAR, 0); // Começa na semana atual
+    private void renderizarDias(Map<String, Boolean> arranchadosMap) {
+        String[] meals = {"Café", "Almoço", "Janta", "Ceia"};
+        renderizarSemana(arranchadosMap, meals);
+    }
 
-        try {
-            Log.d("ArranchamentoActivity", "Renderizando dias...");
+    private void renderizarSemana(Map<String, Boolean> arranchadosMap, String[] meals) {
+        HorizontalScrollView weekScrollView = new HorizontalScrollView(this);
+        weekScrollView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
 
-            for (int i = 0; i < 7; i++) {
-                LinearLayout dayLayout = new LinearLayout(this);
-                dayLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout weekLayout = new LinearLayout(this);
+        weekLayout.setOrientation(LinearLayout.HORIZONTAL);
+        weekScrollView.addView(weekLayout);
 
-                String formattedDate = String.format("%04d-%02d-%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
-                TextView dayText = new TextView(this);
-                dayText.setText(String.format("%s (%s)", calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, getResources().getConfiguration().locale), formattedDate));
-                dayText.setTextSize(16);
+        LinearLayout mealLabelsLayout = new LinearLayout(this);
+        mealLabelsLayout.setOrientation(LinearLayout.VERTICAL);
+        mealLabelsLayout.setPadding(0, 40, 0, 0); // Ajustar padding para alinhar
 
-                dayLayout.addView(dayText);
+        for (String meal : meals) {
+            TextView mealLabel = new TextView(this);
+            mealLabel.setText(meal);
+            mealLabel.setTextSize(18);
+            mealLabel.setGravity(View.TEXT_ALIGNMENT_CENTER);
+            mealLabelsLayout.addView(mealLabel);
+        }
 
-                for (int j = 0; j < meals.length; j++) {
-                    CheckBox mealCheckBox = new CheckBox(this);
-                    mealCheckBox.setText(meals[j]);
-                    String key = formattedDate + "_" + (j + 1);
-                    mealCheckBox.setTag(key); // Define a tag com o valor da refeição e data
+        weekLayout.addView(mealLabelsLayout);
 
-                    for (int k = 0; k < jsonArray.length(); k++) {
-                        try {
-                            JSONObject obj = jsonArray.getJSONObject(k);
-                            String data = obj.getString("data");
-                            String refeicao = obj.getString("refeicao");
-                            Log.d("ArranchamentoActivity", "Verificando data: " + data + " e refeição: " + refeicao);
+        String[] diasDaSemana = {"Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"};
 
-                            // Comparando data e refeição
-                            if (data.equals(formattedDate) && refeicao.equalsIgnoreCase(meals[j])) {
-                                mealCheckBox.setChecked(true);
-                                Log.d("ArranchamentoActivity", "Checkbox marcado: " + key);
-                                break;
-                            }
-                        } catch (Exception e) {
-                            Log.e("ArranchamentoActivity", "Erro ao verificar refeição", e);
-                        }
-                    }
+        for (int i = 0; i < 7; i++) {
+            LinearLayout dayLayout = new LinearLayout(this);
+            dayLayout.setOrientation(LinearLayout.VERTICAL);
 
-                    dayLayout.addView(mealCheckBox);
+            String formattedDate = String.format("%02d/%02d/%02d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR) % 100);
+            TextView dayText = new TextView(this);
+            dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
+            dayText.setTextSize(16);
+
+            dayLayout.addView(dayText);
+
+            for (int j = 1; j <= meals.length; j++) {
+                CheckBox mealCheckBox = new CheckBox(this);
+                mealCheckBox.setTextSize(18);
+                String key = formattedDate + "_" + j;
+                mealCheckBox.setTag(key);
+
+                if (arranchadosMap.containsKey(key)) {
+                    mealCheckBox.setChecked(true);
                 }
 
-                daysContainer.addView(dayLayout);
-                calendar.add(Calendar.DAY_OF_WEEK, 1);
+                dayLayout.addView(mealCheckBox);
             }
-        } catch (Exception e) {
-            Log.e("ArranchamentoActivity", "Erro ao renderizar dias", e);
+
+            weekLayout.addView(dayLayout);
+            calendar.add(Calendar.DAY_OF_WEEK, 1);
+        }
+
+        weeksContainer.addView(weekScrollView);
+        calendar.add(Calendar.DAY_OF_WEEK, -7); // Voltar 7 dias para garantir que a contagem de semanas continue correta
+    }
+
+    private void carregarProximaSemana() {
+        saveCheckboxStates();
+        calendar.add(Calendar.WEEK_OF_YEAR, 1); // Mover para a próxima semana antes de renderizar
+        String[] meals = {"Café", "Almoço", "Janta", "Ceia"};
+        renderizarSemana(new HashMap<>(), meals);
+    }
+
+    private void saveCheckboxStates() {
+        int weekCount = weeksContainer.getChildCount();
+        for (int w = 0; w < weekCount; w++) {
+            HorizontalScrollView weekScrollView = (HorizontalScrollView) weeksContainer.getChildAt(w);
+            LinearLayout weekLayout = (LinearLayout) weekScrollView.getChildAt(0);
+            int dayCount = weekLayout.getChildCount();
+            for (int d = 1; d < dayCount; d++) { // start from 1 to skip mealLabelsLayout
+                LinearLayout dayLayout = (LinearLayout) weekLayout.getChildAt(d);
+                int mealCount = dayLayout.getChildCount();
+                for (int j = 1; j < mealCount; j++) {
+                    CheckBox mealCheckBox = (CheckBox) dayLayout.getChildAt(j);
+                    checkboxStates.put((String) mealCheckBox.getTag(), mealCheckBox.isChecked());
+                }
+            }
         }
     }
 
-    private void loadMoreWeeks() {
-        if (arranchamentoData == null) {
-            Log.e("ArranchamentoActivity", "arranchamentoData é nulo.");
-            return;
-        }
-        String[] meals = {"cafe", "almoco", "janta", "ceia"};
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        calendar.add(Calendar.WEEK_OF_YEAR, 1); // Adiciona uma semana para carregar mais dados
-
-        try {
-            Log.d("ArranchamentoActivity", "Carregando mais semanas...");
-
-            for (int i = 0; i < 7; i++) {
-                LinearLayout dayLayout = new LinearLayout(this);
-                dayLayout.setOrientation(LinearLayout.VERTICAL);
-
-                String formattedDate = String.format("%04d-%02d-%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
-                TextView dayText = new TextView(this);
-                dayText.setText(String.format("%s (%s)", calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, getResources().getConfiguration().locale), formattedDate));
-                dayText.setTextSize(16);
-
-                dayLayout.addView(dayText);
-
-                for (int j = 0; j < 4; j++) {
-                    CheckBox mealCheckBox = new CheckBox(this);
-                    mealCheckBox.setText(meals[j]);
-                    String key = formattedDate + "_" + (j + 1);
-                    mealCheckBox.setTag(key); // Define a tag com o valor da refeição e data
-
-                    for (int k = 0; k < arranchamentoData.length(); k++) {
-                        try {
-                            JSONObject obj = arranchamentoData.getJSONObject(k);
-                            String data = obj.getString("data");
-                            String refeicao = obj.getString("refeicao");
-                            Log.d("ArranchamentoActivity", "Verificando data: " + data + " e refeição: " + refeicao);
-
-                            // Comparando data e refeição
-                            if (data.equals(formattedDate) && refeicao.equalsIgnoreCase(meals[j])) {
-                                mealCheckBox.setChecked(true);
-                                Log.d("ArranchamentoActivity", "Checkbox marcado: " + key);
-                                break;
-                            }
-                        } catch (Exception e) {
-                            Log.e("ArranchamentoActivity", "Erro ao verificar refeição", e);
-                        }
+    private void restoreCheckboxStates() {
+        int weekCount = weeksContainer.getChildCount();
+        for (int w = 0; w < weekCount; w++) {
+            HorizontalScrollView weekScrollView = (HorizontalScrollView) weeksContainer.getChildAt(w);
+            LinearLayout weekLayout = (LinearLayout) weekScrollView.getChildAt(0);
+            int dayCount = weekLayout.getChildCount();
+            for (int d = 1; d < dayCount; d++) { // start from 1 to skip mealLabelsLayout
+                LinearLayout dayLayout = (LinearLayout) weekLayout.getChildAt(d);
+                int mealCount = dayLayout.getChildCount();
+                for (int j = 1; j < mealCount; j++) {
+                    CheckBox mealCheckBox = (CheckBox) dayLayout.getChildAt(j);
+                    if (checkboxStates.containsKey(mealCheckBox.getTag())) {
+                        mealCheckBox.setChecked(checkboxStates.get(mealCheckBox.getTag()));
                     }
-
-                    dayLayout.addView(mealCheckBox);
                 }
-
-                daysContainer.addView(dayLayout);
-                calendar.add(Calendar.DAY_OF_WEEK, 1);
             }
-        } catch (Exception e) {
-            Log.e("ArranchamentoActivity", "Erro ao carregar mais semanas", e);
         }
     }
 
     private void enviarArranchamento() {
-        int childCount = daysContainer.getChildCount();
+        saveCheckboxStates();
+
         List<String> arranchamentos = new ArrayList<>();
-
-        for (int i = 0; i < childCount; i++) {
-            LinearLayout dayLayout = (LinearLayout) daysContainer.getChildAt(i);
-            int mealCount = dayLayout.getChildCount();
-
-            for (int j = 1; j < mealCount; j++) { // Ignorando o primeiro elemento que é o TextView
-                CheckBox mealCheckBox = (CheckBox) dayLayout.getChildAt(j);
-                if (mealCheckBox.isChecked()) {
-                    String[] parts = mealCheckBox.getTag().toString().split("_");
-                    String formattedDate = parts[0];
-                    int mealIndex = Integer.parseInt(parts[1]);
-                    arranchamentos.add(formattedDate + "_" + mealIndex);
-                }
+        for (Map.Entry<String, Boolean> entry : checkboxStates.entrySet()) {
+            if (entry.getValue()) {
+                arranchamentos.add(entry.getKey());
             }
         }
-
-        Log.d("ArranchamentoActivity", "Arranchamentos para envio: " + arranchamentos.toString());
 
         Call<ResponseBody> call = apiService.enviarArranchamento(arranchamentos.toArray(new String[0]), "true");
         call.enqueue(new Callback<ResponseBody>() {
