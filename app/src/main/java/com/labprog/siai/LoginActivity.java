@@ -20,6 +20,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText emailField;
     private EditText passwordField;
     private Button loginButton;
+    private TextView registerLink;
     private ApiService apiService;
 
     @Override
@@ -30,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         emailField = findViewById(R.id.email);
         passwordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.login_button);
+        registerLink = findViewById(R.id.register_link);
         apiService = ApiClient.getClient().create(ApiService.class);
 
         loginButton.setOnClickListener(v -> {
@@ -40,6 +42,11 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
             login(email, password);
+        });
+
+        registerLink.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
     }
 
