@@ -31,7 +31,11 @@ public interface ApiService {
 
     @FormUrlEncoded
     @POST("arranchamento")
-    Call<ResponseBody> enviarArranchamento(@Field("arranchamento[]") String[] arranchamentos, @Field("fromApp") String fromApp);
+    Call<ResponseBody> enviarArranchamento(
+            @Field("arranchamento[]") String[] arranchamentos,
+            @Field("fromApp") String fromApp,
+            @Field("lastDateDisplayed") String lastDateDisplayed
+    );
 
     @GET("arranchamento")
     Call<ResponseBody> getArranchamentoData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
