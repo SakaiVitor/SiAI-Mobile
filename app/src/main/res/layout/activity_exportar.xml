@@ -1,19 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#1e352e">
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:padding="16dp"
+android:background="#A4B1B3"
+tools:context=".MainActivity">
 
+<!-- Header -->
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="#29443A"
+    android:text="Menu"
+    android:textColor="#FFFFFF"
+    android:textSize="24sp"
+    android:textStyle="bold" />
+
+<!-- Navigation Bar -->
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#4B7A62"
+    android:padding="8dp"
+    android:gravity="center">
+
+    <Button
+        android:id="@+id/preencher_arranchamento"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Preencher Arranchamento"
+        android:background="?attr/selectableItemBackground"
+        android:textColor="#FFFFFF"
+        android:padding="8dp" />
+
+    <Button
+        android:id="@+id/exportar_arranchamento"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Exportar Arranchamento"
+        android:background="?attr/selectableItemBackground"
+        android:textColor="#FFFFFF"
+        android:padding="8dp" />
+
+    <Button
+        android:id="@+id/sair"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Sair"
+        android:background="?attr/selectableItemBackground"
+        android:textColor="#FFFFFF"
+        android:padding="8dp" />
+</LinearLayout>
+
+<!-- Form Container -->
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFF7E5"
+    android:padding="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_gravity="center">
+
+    <!-- Date Fields -->
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Data de Início:"
+        android:textColor="#000000"
+        android:layout_marginTop="8dp" />
+    <EditText
+        android:id="@+id/data_inicio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Exportar Arranchamento"
-        android:textSize="24sp"
-        android:textColor="#f3ecd6"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"
-        android:fontFamily="sans-serif"/>
+        android:inputType="date"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Data Final:"
+        android:textColor="#000000"
+        android:layout_marginTop="8dp" />
+    <EditText
+        android:id="@+id/data_final"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginTop="4dp" />
+
+    <!-- Turma Field -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turma:"
+        android:textColor="#000000"
+        android:layout_marginTop="8dp" />
+    <EditText
+        android:id="@+id/turma"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginTop="4dp"
+        android:hint="25"
+        android:enabled="true" />
+
+    <!-- Pelotão Field -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pelotão:"
+        android:textColor="#000000"
+        android:layout_marginTop="8dp" />
+    <EditText
+        android:id="@+id/pelotao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginTop="4dp"
+        android:hint="1"
+        android:enabled="true" />
+
+    <!-- Export Button -->
+    <Button
+        android:id="@+id/exportar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Exportar"
+        android:background="#4B7A62"
+        android:textColor="#FFFFFF"
+        android:padding="12dp" />
+</LinearLayout>
 </LinearLayout>
