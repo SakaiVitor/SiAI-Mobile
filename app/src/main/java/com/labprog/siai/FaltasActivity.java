@@ -43,7 +43,8 @@ public class FaltasActivity extends AppCompatActivity {
     private CaptureManager captureManager;
     private TextView loadingTextView;
     private Button buttonScan;
-    private boolean isScanning = false; // Flag para controlar o estado do escaneamento
+    private boolean isProcessing = false; // Flag para rastrear se há uma resposta pendente
+    private String lastScannedCode = ""; // Variável para armazenar o último QR code escaneado
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,32 +131,38 @@ public class FaltasActivity extends AppCompatActivity {
     }
 
     private void startScanning() {
-        if (!isScanning) {
-            barcodeView.setVisibility(View.VISIBLE);
-            isScanning = true;
-            barcodeView.decodeContinuous(new BarcodeCallback() {
-                @Override
-                public void barcodeResult(BarcodeResult result) {
-                    if (result != null) {
-                        try {
-                            int userId = Integer.parseInt(result.getText());
-                            Log.d("QRCode", "QR code lido com sucesso: " + userId);
-                            sendMealInfo(userId);
-                            barcodeView.pause(); // Pausar o escaneamento após a leitura
-                            isScanning = false; // Resetar a flag de escaneamento
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(FaltasActivity.this, "QR code inválido", Toast.LENGTH_LONG).show();
-                            Log.d("QRCode", "QR code inválido: " + result.getText());
-                        }
+        barcodeView.setVisibility(View.VISIBLE);
+        barcodeView.resume(); // Certifique-se de que o escaneamento está ativo
+        barcodeView.decodeContinuous(new BarcodeCallback() {
+            @Override
+            public void barcodeResult(BarcodeResult result) {
+                if (result != null) {
+                    String scannedCode = result.getText();
+                    if (isProcessing) {
+                        Toast.makeText(FaltasActivity.this, "Ainda processando o arranchamento anterior...", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    try {
+                        int userId = Integer.parseInt(scannedCode);
+                        Log.d("QRCode", "QR code lido com sucesso: " + userId);
+                        isProcessing = true;
+                        lastScannedCode = scannedCode;
+                        Toast.makeText(FaltasActivity.this, "Processando arranchamento...", Toast.LENGTH_SHORT).show();
+                        barcodeView.pause(); // Pausar o escaneamento durante o processamento
+                        sendMealInfo(userId);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(FaltasActivity.this, "QR code inválido", Toast.LENGTH_LONG).show();
+                        Log.d("QRCode", "QR code inválido: " + scannedCode);
                     }
                 }
+            }
 
-                @Override
-                public void possibleResultPoints(List<ResultPoint> resultPoints) {
-                    // Não utilizado neste exemplo
-                }
-            });
-        }
+            @Override
+            public void possibleResultPoints(List<ResultPoint> resultPoints) {
+                // Não utilizado neste exemplo
+            }
+        });
     }
 
     private void sendMealInfo(int userId) {
@@ -170,6 +177,10 @@ public class FaltasActivity extends AppCompatActivity {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                isProcessing = false;
+                lastScannedCode = ""; // Resetar o último código escaneado após o processamento
+                barcodeView.resume(); // Retomar o escaneamento
+
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
@@ -196,6 +207,10 @@ public class FaltasActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                isProcessing = false;
+                lastScannedCode = ""; // Resetar o último código escaneado após falha
+                barcodeView.resume(); // Retomar o escaneamento
+
                 Toast.makeText(FaltasActivity.this, "Erro de rede ao enviar informações", Toast.LENGTH_LONG).show();
                 Log.d("sendMealInfo", "Erro de rede ao enviar informações", t);
             }
@@ -212,12 +227,14 @@ public class FaltasActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         captureManager.onResume();
+        barcodeView.resume(); // Certifique-se de que o escaneamento está ativo
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         captureManager.onPause();
+        barcodeView.pause(); // Pausar o escaneamento ao pausar a atividade
     }
 
     @Override
