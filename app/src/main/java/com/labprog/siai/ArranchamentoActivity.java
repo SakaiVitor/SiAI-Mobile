@@ -229,7 +229,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
                     calendar.get(Calendar.MONTH) + 1, // Calendar.MONTH retorna 0-11, então adicione 1
                     calendar.get(Calendar.YEAR)); // Pega apenas os dois últimos dígitos do ano
 
-            @SuppressLint("DefaultLocale") String formattedDate = String.format("%02d/%02d/%02d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR)%100);
+            @SuppressLint("DefaultLocale") String formattedDate = String.format("%02d/%02d/%02d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)%100);
             TextView dayText = new TextView(this);
             dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
             dayText.setTextSize(16);

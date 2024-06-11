@@ -3,15 +3,12 @@ package com.labprog.siai;
 import static android.app.ProgressDialog.show;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
@@ -22,22 +19,30 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class MenuActivity extends AppCompatActivity {
 
     private ApiService apiService;
-    private TableLayout tableLayout;
-    private TextView loadingTextView;
+    private TextView textViewRefeicoes, loadingTextView;
+    private ImageView imageViewQR;
     private String sessionId;
-    private Button logoutButton, preencherButton, exportarButton;
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -48,20 +53,13 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        tableLayout = findViewById(R.id.tableLayout);
+        textViewRefeicoes = findViewById(R.id.textViewRefeicoes);
+        imageViewQR = findViewById(R.id.imageViewQR);
         loadingTextView = findViewById(R.id.loadingTextView);
-        //logoutButton = findViewById(R.id.logoutButton);
-        //preencherButton = findViewById(R.id.preencherButton);
-        //exportarButton = findViewById(R.id.exportarButton);
-        apiService = ApiClient.getClient().create(ApiService.class);
 
+        apiService = ApiClient.getClient().create(ApiService.class);
         sessionId = getIntent().getStringExtra("sessionId");
 
-        //logoutButton.setOnClickListener(v -> logout());
-        //preencherButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class)));
-        //exportarButton.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ExportarActivity.class)));
-
-        //getMenuData();
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -73,13 +71,13 @@ public class MenuActivity extends AppCompatActivity {
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(item -> {
-            if(item.getItemId()==R.id.itemMenu){
+            if (item.getItemId() == R.id.itemMenu) {
                 startActivity(new Intent(MenuActivity.this, MenuActivity.class));
-            } else if(item.getItemId()==R.id.itemPreencher){
+            } else if (item.getItemId() == R.id.itemPreencher) {
                 startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
-            } else if (item.getItemId()==R.id.itemExportar) {
+            } else if (item.getItemId() == R.id.itemExportar) {
                 startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
-            }else if(item.getItemId()==R.id.itemSair){
+            } else if (item.getItemId() == R.id.itemSair) {
                 logout();
             }
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -90,7 +88,9 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void getMenuData() {
-        Call<ResponseBody> call = apiService.getMenuData("true", sessionId);
+        String todayDate = getTodayDateInSqlFormat();
+        boolean fromApp = true; // Adicione o parâmetro fromApp
+        Call<ResponseBody> call = apiService.getMenuData(todayDate, sessionId, fromApp);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -99,39 +99,15 @@ public class MenuActivity extends AppCompatActivity {
                     try {
                         String jsonResponse = response.body().string();
                         Log.d("MenuActivity", "JSON Response: " + jsonResponse);
-                        if (jsonResponse.startsWith("{")) {
-                            JSONObject jsonObject = new JSONObject(jsonResponse);
-                            if (jsonObject.has("topUsuariosNomes") && jsonObject.has("topUsuariosOcorrencias")) {
-                                JSONArray topUsuariosNomes = jsonObject.getJSONArray("topUsuariosNomes");
-                                JSONArray topUsuariosOcorrencias = jsonObject.getJSONArray("topUsuariosOcorrencias");
+                        JSONObject jsonObject = new JSONObject(jsonResponse);
+                        if (jsonObject.has("usuario_id") && jsonObject.has("arranchamentosHoje")) {
+                            int usuarioId = jsonObject.getInt("usuario_id");
+                            JSONArray arranchamentosHoje = jsonObject.getJSONArray("arranchamentosHoje");
 
-                                for (int i = 0; i < topUsuariosNomes.length(); i++) {
-                                    TableRow tableRow = new TableRow(MenuActivity.this);
-
-                                    TextView nomeTextView = new TextView(MenuActivity.this);
-                                    nomeTextView.setText(topUsuariosNomes.getString(i));
-                                    nomeTextView.setTextColor(getResources().getColor(android.R.color.white));
-                                    nomeTextView.setPadding(8, 8, 8, 8);
-                                    //nomeTextView.setGravity(Gravity.CENTER);
-                                    tableRow.addView(nomeTextView);
-
-                                    TextView ocorrenciasTextView = new TextView(MenuActivity.this);
-                                    ocorrenciasTextView.setText(String.valueOf(topUsuariosOcorrencias.getInt(i)));
-                                    ocorrenciasTextView.setTextColor(getResources().getColor(android.R.color.white));
-                                    ocorrenciasTextView.setPadding(8, 8, 8, 8);
-                                    ocorrenciasTextView.setGravity(Gravity.CENTER);
-                                    tableRow.addView(ocorrenciasTextView);
-
-                                    tableLayout.addView(tableRow);
-                                }
-                            } else {
-                                Log.e("MenuActivity", "JSON inesperado: " + jsonResponse);
-                                Toast.makeText(MenuActivity.this, "Erro ao processar dados: JSON inesperado", Toast.LENGTH_SHORT).show();
-                            }
+                            displayMenuData(usuarioId, arranchamentosHoje);
                         } else {
-                            // Trata a resposta HTML como erro
-                            Log.e("MenuActivity", "Resposta inesperada do servidor: " + jsonResponse);
-                            Toast.makeText(MenuActivity.this, "Erro ao processar dados: Resposta inesperada do servidor", Toast.LENGTH_SHORT).show();
+                            Log.e("MenuActivity", "JSON inesperado: " + jsonResponse);
+                            Toast.makeText(MenuActivity.this, "Erro ao processar dados: JSON inesperado", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Log.e("MenuActivity", "Erro ao processar JSON", e);
@@ -150,25 +126,60 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
     }
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_principal,menu);
 
-        return super.onCreateOptionsMenu(menu);
-    }*/
+
+    private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje) throws JSONException {
+        StringBuilder refeicoesBuilder = new StringBuilder();
+        for (int i = 0; i < arranchamentosHoje.length(); i++) {
+            String refeicao = arranchamentosHoje.getString(i);
+            if (!refeicoesBuilder.toString().contains(refeicao)) {
+                refeicoesBuilder.append(refeicao).append("\n");
+            }
+        }
+        textViewRefeicoes.setText(refeicoesBuilder.toString());
+
+        Bitmap qrCodeBitmap = generateQRCode(String.valueOf(usuarioId));
+        if (qrCodeBitmap != null) {
+            imageViewQR.setImageBitmap(qrCodeBitmap);
+        }
+    }
+
+    private Bitmap generateQRCode(String text) {
+        try {
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, 200, 200);
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bitmap.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+                }
+            }
+            return bitmap;
+        } catch (WriterException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String getTodayDateInSqlFormat() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+
     @Override
-    public boolean onOptionsItemSelected(@NotNull MenuItem item){
-        if(item.getItemId()==R.id.itemPreencher){
+    public boolean onOptionsItemSelected(@NotNull MenuItem item) {
+        if (item.getItemId() == R.id.itemPreencher) {
             startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
-        } else if (item.getItemId()==R.id.itemExportar) {
+        } else if (item.getItemId() == R.id.itemExportar) {
             startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
-        }else if(item.getItemId()==R.id.itemSair){
+        } else if (item.getItemId() == R.id.itemSair) {
             logout();
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void logout() {
-        // Limpar sessão ou qualquer dado de login aqui
         Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();

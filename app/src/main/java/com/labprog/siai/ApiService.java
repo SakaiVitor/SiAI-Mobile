@@ -36,7 +36,11 @@ public interface ApiService {
     );
 
     @GET("menuServlet")
-    Call<ResponseBody> getMenuData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
+    Call<ResponseBody> getMenuData(
+            @Query("date") String date,
+            @Query("sessionId") String sessionId,
+            @Query("fromApp") boolean fromApp
+    );
 
     @FormUrlEncoded
     @POST("arranchamento")
