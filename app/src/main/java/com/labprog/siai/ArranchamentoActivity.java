@@ -1,10 +1,12 @@
 package com.labprog.siai;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -50,8 +52,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
     private View loader;
     private Map<String, Boolean> checkboxStates = new HashMap<>();
     private Calendar calendar;
-    private Map<String, Boolean> arranchadosMap = new HashMap<>(); // Alterado aqui
-
+    private Map<String, Boolean> arranchadosMap = new HashMap<>();
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
@@ -216,24 +217,40 @@ public class ArranchamentoActivity extends AppCompatActivity {
 
         weekLayout.addView(mealLabelsLayout);
 
-        String[] diasDaSemana = {"Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"};
+        String[] diasDaSemana = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"};
 
         for (int i = 0; i < 7; i++) {
             LinearLayout dayLayout = new LinearLayout(this);
             dayLayout.setOrientation(LinearLayout.VERTICAL);
 
-            String formattedDate = String.format("%02d/%02d/%04d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
+            @SuppressLint("DefaultLocale")
+            String fullDate = String.format("%02d/%02d/%02d",
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    calendar.get(Calendar.MONTH) + 1, // Calendar.MONTH retorna 0-11, então adicione 1
+                    calendar.get(Calendar.YEAR)); // Pega apenas os dois últimos dígitos do ano
+
+            @SuppressLint("DefaultLocale") String formattedDate = String.format("%02d/%02d/%02d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR)%100);
             TextView dayText = new TextView(this);
             dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
-            dayText.setTextSize(14);
-            dayText.setPadding(15, 0, 0, 20);
+            dayText.setTextSize(16);
+            dayText.setTextColor(Color.WHITE);
+            dayText.setPadding(5, 10, 5, 20);
             dayLayout.addView(dayText);
 
             for (int j = 0; j < meals.length; j++) {
                 CheckBox mealCheckBox = new CheckBox(this);
-                mealCheckBox.setTextSize(18);
-                String key = formattedDate + "_" + (j + 1); // Usando índice numérico para refeição
+                mealCheckBox.setScaleX(1.5f);
+                mealCheckBox.setScaleY(1.5f);
+                mealCheckBox.setPadding(40, 10, 10, 10);
+                String key = fullDate + "_" + (j + 1);
                 mealCheckBox.setTag(key);
+
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.gravity = Gravity.CENTER_HORIZONTAL;
+                params.setMargins(30, 0, 30, 0);
+                mealCheckBox.setLayoutParams(params);
 
                 // Verifica o estado da checkbox usando arranchadosMap
                 Log.d("ArranchamentoActivity", "Verificando chave: " + key);
