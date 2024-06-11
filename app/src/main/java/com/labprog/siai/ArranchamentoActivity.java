@@ -1,5 +1,6 @@
 package com.labprog.siai;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -63,7 +64,8 @@ public class ArranchamentoActivity extends AppCompatActivity {
         weeksContainer = findViewById(R.id.weeksContainer);
         Button enviarButton = findViewById(R.id.enviarButton);
         Button exibirMaisButton = findViewById(R.id.exibirMaisButton);
-        loader = findViewById(R.id.loader);
+        loader = findViewById(R.id.loader); // Inicializa o loader
+
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
@@ -111,6 +113,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             return true;
         });
     }
+
 
     private void carregarDados() {
         Call<ResponseBody> call = apiService.getArranchamentoData("true", sessionId);
@@ -282,6 +285,12 @@ public class ArranchamentoActivity extends AppCompatActivity {
     private void enviarArranchamento() {
         saveCheckboxStates();
 
+        // Mostrar ProgressDialog
+        ProgressDialog progressDialog = new ProgressDialog(ArranchamentoActivity.this);
+        progressDialog.setMessage("Enviando...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         List<String> arranchamentos = new ArrayList<>();
         for (Map.Entry<String, Boolean> entry : checkboxStates.entrySet()) {
             if (entry.getValue()) {
@@ -322,8 +331,14 @@ public class ArranchamentoActivity extends AppCompatActivity {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                // Ocultar o ProgressDialog
+                progressDialog.dismiss();
+
                 if (response.isSuccessful()) {
                     Toast.makeText(ArranchamentoActivity.this, "Arranchamento enviado com sucesso", Toast.LENGTH_SHORT).show();
+                    // Redirecionar para outra atividade após o envio bem-sucedido
+                    startActivity(new Intent(ArranchamentoActivity.this, MenuActivity.class));
+                    finish(); // Finaliza a atividade atual
                 } else {
                     Toast.makeText(ArranchamentoActivity.this, "Erro ao enviar arranchamento", Toast.LENGTH_SHORT).show();
                     Log.e("ArranchamentoActivity", "Erro ao enviar arranchamento: " + response.message());
@@ -332,11 +347,15 @@ public class ArranchamentoActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Ocultar o ProgressDialog
+                progressDialog.dismiss();
+
                 Log.e("ArranchamentoActivity", "Erro de rede", t);
                 Toast.makeText(ArranchamentoActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
 
     private String getLastDateDisplayed() {
