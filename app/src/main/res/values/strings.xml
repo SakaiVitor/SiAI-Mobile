@@ -6,4 +6,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="cadastrar">Cadastrar</string>
+    <string-array name="meals_array">
+        <item>Café</item>
+        <item>Almoço</item>
+        <item>Janta</item>
+        <item>Ceia</item>
+    </string-array>
 </resources>

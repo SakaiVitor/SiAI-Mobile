@@ -64,11 +64,14 @@ public class LoginActivity extends AppCompatActivity {
                                 jsonObject.getJSONObject("usuario").getString("email")
                         );
                         String sessionId = jsonObject.getString("sessionId");
+                        String userId = jsonObject.getString("userId");
+                        System.out.println(userId);
 
                         Toast.makeText(LoginActivity.this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show();
                         // Redirecionar para MenuActivity
                         Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
                         intent.putExtra("sessionId", sessionId);
+                        intent.putExtra("userId", userId);
                         startActivity(intent);
                         finish();
                     } catch (Exception e) {

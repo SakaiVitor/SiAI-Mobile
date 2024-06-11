@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
@@ -40,10 +41,11 @@ import java.util.Locale;
 public class MenuActivity extends AppCompatActivity {
 
     private ApiService apiService;
-    private TextView textViewRefeicoes, loadingTextView;
+    private TextView textViewRefeicoes;
+    private ProgressBar loadingProgressBar;
     private ImageView imageViewQR;
     private String sessionId;
-
+    private String userId;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
@@ -55,10 +57,11 @@ public class MenuActivity extends AppCompatActivity {
 
         textViewRefeicoes = findViewById(R.id.textViewRefeicoes);
         imageViewQR = findViewById(R.id.imageViewQR);
-        loadingTextView = findViewById(R.id.loadingTextView);
+        loadingProgressBar = findViewById(R.id.loadingProgressBar);
 
         apiService = ApiClient.getClient().create(ApiService.class);
         sessionId = getIntent().getStringExtra("sessionId");
+        userId = getIntent().getStringExtra("userId");
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -71,14 +74,35 @@ public class MenuActivity extends AppCompatActivity {
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.itemMenu) {
-                startActivity(new Intent(MenuActivity.this, MenuActivity.class));
-            } else if (item.getItemId() == R.id.itemPreencher) {
-                startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
-            } else if (item.getItemId() == R.id.itemExportar) {
-                startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
-            } else if (item.getItemId() == R.id.itemSair) {
-                logout();
+            Intent intent;
+            switch (item.getItemId()) {
+                case R.id.itemMenu:
+                    intent = new Intent(MenuActivity.this, MenuActivity.class);
+                    intent.putExtra("sessionId", sessionId);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemPreencher:
+                    intent = new Intent(MenuActivity.this, ArranchamentoActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemExportar:
+                    intent = new Intent(MenuActivity.this, ExportarActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemFaltas:
+                    intent = new Intent(MenuActivity.this, FaltasActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemSair:
+                    logout();
+                    break;
             }
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
@@ -94,7 +118,7 @@ public class MenuActivity extends AppCompatActivity {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                loadingTextView.setVisibility(View.GONE);
+                loadingProgressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
@@ -120,13 +144,12 @@ public class MenuActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                loadingTextView.setVisibility(View.GONE);
+                loadingProgressBar.setVisibility(View.GONE);
                 Log.e("MenuActivity", "Erro de rede", t);
                 Toast.makeText(MenuActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 
     private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje) throws JSONException {
         StringBuilder refeicoesBuilder = new StringBuilder();
@@ -146,7 +169,7 @@ public class MenuActivity extends AppCompatActivity {
 
     private Bitmap generateQRCode(String text) {
         try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, 200, 200);
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, 600, 600);
             int width = bitMatrix.getWidth();
             int height = bitMatrix.getHeight();
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -165,18 +188,6 @@ public class MenuActivity extends AppCompatActivity {
     private String getTodayDateInSqlFormat() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NotNull MenuItem item) {
-        if (item.getItemId() == R.id.itemPreencher) {
-            startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
-        } else if (item.getItemId() == R.id.itemExportar) {
-            startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
-        } else if (item.getItemId() == R.id.itemSair) {
-            logout();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void logout() {

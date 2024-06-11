@@ -52,5 +52,16 @@ public interface ApiService {
 
     @GET("arranchamento")
     Call<ResponseBody> getArranchamentoData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
+
+    @GET("faltas")
+    Call<ResponseBody> isAdmin(@Query("sessionId") String sessionId);
+
+    @FormUrlEncoded
+    @POST("faltas")
+    Call<ResponseBody> sendMealInfo(
+            @Field("user_id") int userId,
+            @Field("meal_type") String mealType,
+            @Field("date") String date
+    );
 }
 

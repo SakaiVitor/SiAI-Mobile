@@ -54,16 +54,14 @@
                 android:layout_marginTop="16dp"
                 android:contentDescription="QR Code" />
 
-            <TextView
-                android:id="@+id/loadingTextView"
+            <ProgressBar
+                android:id="@+id/loadingProgressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_margin="20dp"
-                android:gravity="center"
-                android:text="Carregando..."
-                android:textColor="#f3ecd6"
-                android:textSize="24sp"
-                android:visibility="visible" />
+                android:visibility="visible"
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large" />
         </LinearLayout>
     </LinearLayout>
 
