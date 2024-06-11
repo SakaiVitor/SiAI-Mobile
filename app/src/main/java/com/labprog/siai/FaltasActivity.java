@@ -43,6 +43,7 @@ public class FaltasActivity extends AppCompatActivity {
     private CaptureManager captureManager;
     private TextView loadingTextView;
     private Button buttonScan;
+    private boolean isScanning = false; // Flag para controlar o estado do escaneamento
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,27 +130,32 @@ public class FaltasActivity extends AppCompatActivity {
     }
 
     private void startScanning() {
-        barcodeView.setVisibility(View.VISIBLE);
-        barcodeView.decodeContinuous(new BarcodeCallback() {
-            @Override
-            public void barcodeResult(BarcodeResult result) {
-                if (result != null) {
-                    try {
-                        int userId = Integer.parseInt(result.getText());
-                        Log.d("QRCode", "QR code lido com sucesso: " + userId);
-                        sendMealInfo(userId);
-                    } catch (NumberFormatException e) {
-                        Toast.makeText(FaltasActivity.this, "QR code inválido", Toast.LENGTH_LONG).show();
-                        Log.d("QRCode", "QR code inválido: " + result.getText());
+        if (!isScanning) {
+            barcodeView.setVisibility(View.VISIBLE);
+            isScanning = true;
+            barcodeView.decodeContinuous(new BarcodeCallback() {
+                @Override
+                public void barcodeResult(BarcodeResult result) {
+                    if (result != null) {
+                        try {
+                            int userId = Integer.parseInt(result.getText());
+                            Log.d("QRCode", "QR code lido com sucesso: " + userId);
+                            sendMealInfo(userId);
+                            barcodeView.pause(); // Pausar o escaneamento após a leitura
+                            isScanning = false; // Resetar a flag de escaneamento
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(FaltasActivity.this, "QR code inválido", Toast.LENGTH_LONG).show();
+                            Log.d("QRCode", "QR code inválido: " + result.getText());
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void possibleResultPoints(List<ResultPoint> resultPoints) {
-                // Não utilizado neste exemplo
-            }
-        });
+                @Override
+                public void possibleResultPoints(List<ResultPoint> resultPoints) {
+                    // Não utilizado neste exemplo
+                }
+            });
+        }
     }
 
     private void sendMealInfo(int userId) {
@@ -164,12 +170,27 @@ public class FaltasActivity extends AppCompatActivity {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(FaltasActivity.this, "Arranchamento encontrado, falta tirada com sucesso", Toast.LENGTH_LONG).show();
-                    Log.d("sendMealInfo", "Informações enviadas com sucesso: " + response.toString());
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String jsonResponse = response.body().string();
+                        JSONObject jsonObject = new JSONObject(jsonResponse);
+                        String message = jsonObject.optString("message", "Resposta do servidor não contém mensagem");
+                        Toast.makeText(FaltasActivity.this, message, Toast.LENGTH_LONG).show();
+                        Log.d("sendMealInfo", "Informações enviadas com sucesso: " + response.toString());
+                    } catch (Exception e) {
+                        Log.e("sendMealInfo", "Erro ao processar JSON", e);
+                    }
                 } else {
-                    Toast.makeText(FaltasActivity.this, "Arranchamento não encontrado", Toast.LENGTH_LONG).show();
-                    Log.d("sendMealInfo", "Erro ao enviar informações: " + response.toString());
+                    try {
+                        String jsonResponse = response.errorBody().string();
+                        JSONObject jsonObject = new JSONObject(jsonResponse);
+                        String message = jsonObject.optString("message", "Resposta do servidor não contém mensagem");
+                        Toast.makeText(FaltasActivity.this, message, Toast.LENGTH_LONG).show();
+                        Log.d("sendMealInfo", "Erro ao enviar informações: " + response.toString());
+                    } catch (Exception e) {
+                        Toast.makeText(FaltasActivity.this, "Erro ao enviar informações", Toast.LENGTH_LONG).show();
+                        Log.e("sendMealInfo", "Erro ao processar JSON", e);
+                    }
                 }
             }
 
