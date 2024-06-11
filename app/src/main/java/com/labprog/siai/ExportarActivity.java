@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import okhttp3.ResponseBody;
@@ -152,9 +153,11 @@ public class ExportarActivity extends AppCompatActivity {
         });
     }
     private boolean saveFile(ResponseBody body, String dataInicio, String dataFim, String turma, String pelotao) {
+        Date date = new Date();
+        long timestamp = date.getTime();
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            String nomeArquivo = "T"+turma+"_P"+pelotao+"º_("+dataInicio.replaceAll("[^a-zA-Z0-9]", "-")+"&"+dataFim.replaceAll("[^a-zA-Z0-9]", "-")+").xlsx";
+            String nomeArquivo = "T"+turma+"_P"+pelotao+"º_("+dataInicio.replaceAll("[^a-zA-Z0-9]", "-")+"&"+dataFim.replaceAll("[^a-zA-Z0-9]", "-")+")"+timestamp+".xlsx";
             File file = new File(path, nomeArquivo);
 
             InputStream inputStream = null;
@@ -165,14 +168,12 @@ public class ExportarActivity extends AppCompatActivity {
 
                 inputStream = body.byteStream();
                 outputStream = new FileOutputStream(file);
-
                 while (true) {
                     int read = inputStream.read(fileReader);
 
                     if (read == -1) {
                         break;
                     }
-
                     outputStream.write(fileReader, 0, read);
                 }
 
