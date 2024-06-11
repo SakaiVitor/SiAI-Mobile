@@ -5,6 +5,7 @@ import static android.app.ProgressDialog.show;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -72,7 +73,9 @@ public class MenuActivity extends AppCompatActivity {
         toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(item -> {
-            if(item.getItemId()==R.id.itemPreencher){
+            if(item.getItemId()==R.id.itemMenu){
+                startActivity(new Intent(MenuActivity.this, MenuActivity.class));
+            } else if(item.getItemId()==R.id.itemPreencher){
                 startActivity(new Intent(MenuActivity.this, ArranchamentoActivity.class));
             } else if (item.getItemId()==R.id.itemExportar) {
                 startActivity(new Intent(MenuActivity.this, ExportarActivity.class));
@@ -109,12 +112,14 @@ public class MenuActivity extends AppCompatActivity {
                                     nomeTextView.setText(topUsuariosNomes.getString(i));
                                     nomeTextView.setTextColor(getResources().getColor(android.R.color.white));
                                     nomeTextView.setPadding(8, 8, 8, 8);
+                                    //nomeTextView.setGravity(Gravity.CENTER);
                                     tableRow.addView(nomeTextView);
 
                                     TextView ocorrenciasTextView = new TextView(MenuActivity.this);
                                     ocorrenciasTextView.setText(String.valueOf(topUsuariosOcorrencias.getInt(i)));
                                     ocorrenciasTextView.setTextColor(getResources().getColor(android.R.color.white));
                                     ocorrenciasTextView.setPadding(8, 8, 8, 8);
+                                    ocorrenciasTextView.setGravity(Gravity.CENTER);
                                     tableRow.addView(ocorrenciasTextView);
 
                                     tableLayout.addView(tableRow);
@@ -145,12 +150,12 @@ public class MenuActivity extends AppCompatActivity {
             }
         });
     }
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_principal,menu);
 
         return super.onCreateOptionsMenu(menu);
-    }
+    }*/
     @Override
     public boolean onOptionsItemSelected(@NotNull MenuItem item){
         if(item.getItemId()==R.id.itemPreencher){

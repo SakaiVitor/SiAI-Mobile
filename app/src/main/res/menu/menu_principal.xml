@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/itemMenu"
+        android:title="Menu"
+        app:showAsAction="never" />
     <item
         android:id="@+id/itemPreencher"
-        android:title="@string/Preencher" />
+        android:title="@string/Preencher"
+        app:showAsAction="never" />
     <item
         android:title="@string/Exportar"
         android:id="@+id/itemExportar"
-        />
+        app:showAsAction="never" />
     <item
         android:title="@string/Sair"
         android:id="@+id/itemSair"
-        />
+        app:showAsAction="never" />
 </menu>

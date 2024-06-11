@@ -1,151 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical"
-android:padding="16dp"
-android:background="#A4B1B3"
-tools:context=".MainActivity">
-
-<!-- Header -->
-<TextView
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:padding="16dp"
-    android:background="#29443A"
-    android:text="Menu"
-    android:textColor="#FFFFFF"
-    android:textSize="24sp"
-    android:textStyle="bold" />
+    android:layout_height="match_parent">
 
-<!-- Navigation Bar -->
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="#4B7A62"
-    android:padding="8dp"
-    android:gravity="center">
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2D3E3F"
+        android:orientation="vertical"
+        >
 
-    <Button
-        android:id="@+id/preencher_arranchamento"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Preencher Arranchamento"
-        android:background="?attr/selectableItemBackground"
-        android:textColor="#FFFFFF"
-        android:padding="8dp" />
+        <!-- Header -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#488273"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <Button
-        android:id="@+id/exportar_arranchamento"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Exportar Arranchamento"
-        android:background="?attr/selectableItemBackground"
-        android:textColor="#FFFFFF"
-        android:padding="8dp" />
+        <!-- Form Container -->
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="30sp"
+            android:text="Exportar arranchamento"
+            android:textAlignment="center"
+            android:textColor="#ffffff"
+            android:textSize="28sp" />
 
-    <Button
-        android:id="@+id/sair"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Sair"
-        android:background="?attr/selectableItemBackground"
-        android:textColor="#FFFFFF"
-        android:padding="8dp" />
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            android:layout_marginTop="16dp"
+            android:background="#2D3E3F"
+            android:orientation="vertical"
+            >
 
-<!-- Form Container -->
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#FFF7E5"
-    android:padding="16dp"
-    android:layout_marginTop="16dp"
-    android:layout_gravity="center">
+            <!-- Date Fields -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Data de Início:"
+                android:textColor="#ffffff" />
 
-    <!-- Date Fields -->
-    <TextView
+            <EditText
+                android:id="@+id/data_inicio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/edit_text_background"
+                android:focusable="false"
+                android:inputType="none"
+                android:padding="10dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Data Final:"
+                android:textColor="#ffffff" />
+
+            <EditText
+                android:id="@+id/data_final"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/edit_text_background"
+                android:focusable="false"
+                android:inputType="none"
+                android:padding="10dp"
+                android:textColor="#FFFFFF" />
+
+            <!-- Turma Field -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Turma:"
+                android:textColor="#ffffff" />
+
+            <EditText
+                android:id="@+id/turma"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/edit_text_background"
+                android:enabled="true"
+                android:hint="25"
+                android:inputType="number"
+                android:padding="10dp"
+                android:textColor="#FFFFFF" />
+
+            <!-- Pelotão Field -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Pelotão:"
+                android:textColor="#ffffff" />
+
+            <EditText
+                android:id="@+id/pelotao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/edit_text_background"
+                android:enabled="true"
+                android:hint="1"
+                android:inputType="number"
+                android:padding="10dp"
+                android:textColor="#ffffff" />
+
+            <!-- Export Button -->
+            <Button
+                android:id="@+id/exportar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="#4B7A62"
+                android:padding="12dp"
+                android:text="Exportar"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Navigation View -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigationView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Data de Início:"
-        android:textColor="#000000"
-        android:layout_marginTop="8dp" />
-    <EditText
-        android:id="@+id/data_inicio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="date"
-        android:background="@android:drawable/edit_text"
-        android:padding="10dp"
-        android:layout_marginTop="4dp" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/menu_principal" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Data Final:"
-        android:textColor="#000000"
-        android:layout_marginTop="8dp" />
-    <EditText
-        android:id="@+id/data_final"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="date"
-        android:background="@android:drawable/edit_text"
-        android:padding="10dp"
-        android:layout_marginTop="4dp" />
-
-    <!-- Turma Field -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Turma:"
-        android:textColor="#000000"
-        android:layout_marginTop="8dp" />
-    <EditText
-        android:id="@+id/turma"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:background="@android:drawable/edit_text"
-        android:padding="10dp"
-        android:layout_marginTop="4dp"
-        android:hint="25"
-        android:enabled="true" />
-
-    <!-- Pelotão Field -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pelotão:"
-        android:textColor="#000000"
-        android:layout_marginTop="8dp" />
-    <EditText
-        android:id="@+id/pelotao"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:background="@android:drawable/edit_text"
-        android:padding="10dp"
-        android:layout_marginTop="4dp"
-        android:hint="1"
-        android:enabled="true" />
-
-    <!-- Export Button -->
-    <Button
-        android:id="@+id/exportar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Exportar"
-        android:background="#4B7A62"
-        android:textColor="#FFFFFF"
-        android:padding="12dp" />
-</LinearLayout>
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
