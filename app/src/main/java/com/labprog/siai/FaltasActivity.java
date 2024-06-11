@@ -3,9 +3,9 @@ package com.labprog.siai;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,18 +13,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.Result;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
+import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import okhttp3.ResponseBody;
@@ -39,9 +39,10 @@ public class FaltasActivity extends AppCompatActivity {
     private String userId;
     private boolean isAdmin;
     private Spinner spinnerMeals;
-    private SurfaceView surfaceViewCamera;
-    private TextView loadingTextView;
     private DecoratedBarcodeView barcodeView;
+    private CaptureManager captureManager;
+    private TextView loadingTextView;
+    private Button buttonScan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +50,9 @@ public class FaltasActivity extends AppCompatActivity {
         setContentView(R.layout.activity_faltas);
 
         spinnerMeals = findViewById(R.id.spinnerMeals);
-        surfaceViewCamera = findViewById(R.id.surfaceViewCamera);
+        barcodeView = findViewById(R.id.barcodeView);
         loadingTextView = findViewById(R.id.loadingTextView);
+        buttonScan = findViewById(R.id.buttonScan);
 
         apiService = ApiClient.getClient().create(ApiService.class);
         sessionId = getIntent().getStringExtra("sessionId");
@@ -64,6 +66,16 @@ public class FaltasActivity extends AppCompatActivity {
         spinnerMeals.setAdapter(adapter);
 
         checkLoginAndAdmin();
+
+        buttonScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startScanning();
+            }
+        });
+
+        captureManager = new CaptureManager(this, barcodeView);
+        captureManager.initializeFromIntent(getIntent(), savedInstanceState);
     }
 
     private void checkLoginAndAdmin() {
@@ -114,48 +126,30 @@ public class FaltasActivity extends AppCompatActivity {
 
     private void setupUI() {
         // Configurar o spinner já foi feito no onCreate
-
-        // Inicializar o SurfaceView para a câmera
-        SurfaceHolder surfaceHolder = surfaceViewCamera.getHolder();
-        surfaceHolder.addCallback((SurfaceHolder.Callback) this);
-
-        // Inicializar o BarcodeView para o escaneamento do QR code
-        barcodeView = new DecoratedBarcodeView(this);
-        barcodeView.setStatusText("Posicione o QR code na área de escaneamento");
-        barcodeView.initializeFromIntent(getIntent());
-        barcodeView.decodeContinuous((BarcodeCallback) this);
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        // Inicializar a câmera quando o SurfaceView é criado
-        barcodeView.getBarcodeView().startPreview();
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // Lidar com mudanças de superfície, se necessário
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // Parar a câmera quando o SurfaceView é destruído
-        barcodeView.pause();
-    }
-
-    @Override
-    public void onScanResult(Result result) {
-        // Lidar com o resultado do escaneamento do QR code
-        if (result != null) {
-            try {
-                int userId = Integer.parseInt(result.getText());
-                Log.d("QRCode", "QR code lido com sucesso: " + userId);
-                sendMealInfo(userId);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "QR code inválido", Toast.LENGTH_LONG).show();
-                Log.d("QRCode", "QR code inválido: " + result.getContents());
+    private void startScanning() {
+        barcodeView.setVisibility(View.VISIBLE);
+        barcodeView.decodeContinuous(new BarcodeCallback() {
+            @Override
+            public void barcodeResult(BarcodeResult result) {
+                if (result != null) {
+                    try {
+                        int userId = Integer.parseInt(result.getText());
+                        Log.d("QRCode", "QR code lido com sucesso: " + userId);
+                        sendMealInfo(userId);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(FaltasActivity.this, "QR code inválido", Toast.LENGTH_LONG).show();
+                        Log.d("QRCode", "QR code inválido: " + result.getText());
+                    }
+                }
             }
-        }
+
+            @Override
+            public void possibleResultPoints(List<ResultPoint> resultPoints) {
+                // Não utilizado neste exemplo
+            }
+        });
     }
 
     private void sendMealInfo(int userId) {
@@ -171,10 +165,10 @@ public class FaltasActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(FaltasActivity.this, "Informações enviadas com sucesso", Toast.LENGTH_LONG).show();
+                    Toast.makeText(FaltasActivity.this, "Arranchamento encontrado, falta tirada com sucesso", Toast.LENGTH_LONG).show();
                     Log.d("sendMealInfo", "Informações enviadas com sucesso: " + response.toString());
                 } else {
-                    Toast.makeText(FaltasActivity.this, "Erro ao enviar informações", Toast.LENGTH_LONG).show();
+                    Toast.makeText(FaltasActivity.this, "Arranchamento não encontrado", Toast.LENGTH_LONG).show();
                     Log.d("sendMealInfo", "Erro ao enviar informações: " + response.toString());
                 }
             }
@@ -191,5 +185,29 @@ public class FaltasActivity extends AppCompatActivity {
     private String getTodayDateInSqlFormat() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(new Date());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        captureManager.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        captureManager.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        captureManager.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        captureManager.onSaveInstanceState(outState);
     }
 }
