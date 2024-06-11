@@ -1,5 +1,7 @@
 package com.labprog.siai;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,7 +12,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +51,10 @@ public class ArranchamentoActivity extends AppCompatActivity {
     private Calendar calendar;
     private Map<String, Boolean> arranchadosMap = new HashMap<>(); // Alterado aqui
 
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +85,30 @@ public class ArranchamentoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 carregarProximaSemana();
             }
+        });
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            if(item.getItemId()==R.id.itemMenu){
+                startActivity(new Intent(ArranchamentoActivity.this, MenuActivity.class));
+            } else if(item.getItemId()==R.id.itemPreencher){
+                startActivity(new Intent(ArranchamentoActivity.this, ArranchamentoActivity.class));
+            } else if (item.getItemId()==R.id.itemExportar) {
+                startActivity(new Intent(ArranchamentoActivity.this, ExportarActivity.class));
+            }else if(item.getItemId()==R.id.itemSair){
+                logout();
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
         });
     }
 
@@ -130,14 +166,16 @@ public class ArranchamentoActivity extends AppCompatActivity {
 
         LinearLayout mealLabelsLayout = new LinearLayout(this);
         mealLabelsLayout.setOrientation(LinearLayout.VERTICAL);
-        mealLabelsLayout.setPadding(0, 40, 0, 0);
+        mealLabelsLayout.setPadding(0, 100, 0, 0);
 
         for (String meal : meals) {
             TextView mealLabel = new TextView(this);
             mealLabel.setText(meal.substring(0, 1).toUpperCase() + meal.substring(1));
-            mealLabel.setTextSize(18);
+            mealLabel.setTextSize(16);
             mealLabel.setGravity(View.TEXT_ALIGNMENT_CENTER);
             mealLabelsLayout.addView(mealLabel);
+            mealLabel.setTextColor(Color.WHITE);
+            mealLabel.setPadding(0,25,40,0);
         }
 
         weekLayout.addView(mealLabelsLayout);
@@ -148,11 +186,13 @@ public class ArranchamentoActivity extends AppCompatActivity {
             LinearLayout dayLayout = new LinearLayout(this);
             dayLayout.setOrientation(LinearLayout.VERTICAL);
 
-            String formattedDate = String.format("%04d-%02d-%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
+
+            String formattedDate = String.format("%02d/%02d/%04d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
             TextView dayText = new TextView(this);
             dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
-            dayText.setTextSize(16);
-
+            dayText.setTextSize(14);
+            //dayText.setTextColor(Color.WHITE); // Mudar a cor dos dias da semana para branco
+            dayText.setPadding(15, 0, 0, 20);
             dayLayout.addView(dayText);
 
             for (int j = 0; j < meals.length; j++) {
@@ -291,5 +331,11 @@ public class ArranchamentoActivity extends AppCompatActivity {
         return formattedData.toString();
     }
 
+    private void logout() {
+        // Limpar sessão ou qualquer dado de login aqui
+        Intent intent = new Intent(ArranchamentoActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
 }

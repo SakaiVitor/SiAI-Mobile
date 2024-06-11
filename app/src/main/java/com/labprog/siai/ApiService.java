@@ -26,6 +26,15 @@ public interface ApiService {
             @Field("password") String senha
     );
 
+    @FormUrlEncoded
+    @POST("export")
+    Call<Void> export(
+            @Field("dataInicio") String dataInicio,
+            @Field("dataFim") String dataFim,
+            @Field("turma") String turma,
+            @Field("pelotao") String pelotao
+    );
+
     @GET("menuServlet")
     Call<ResponseBody> getMenuData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
 

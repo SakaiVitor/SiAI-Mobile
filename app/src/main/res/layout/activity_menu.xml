@@ -10,20 +10,21 @@
         android:layout_height="match_parent"
         android:background="#2D3E3F"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#488273"
+            android:background="#526E5E"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -33,7 +34,7 @@
                 android:gravity="center"
                 android:paddingTop="40dp"
                 android:text="Guerreiros Mais Arranchados"
-                android:textColor="#f3ecd6"
+                android:textColor="#ffffff"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -74,6 +75,7 @@
                     android:id="@+id/tableLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
                     android:stretchColumns="1">
 
                     <TableRow>
@@ -81,7 +83,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="#488273"
+                            android:background="#526E5E"
+                            android:gravity="center_horizontal"
                             android:padding="8dp"
                             android:text="Nome de Guerra"
                             android:textColor="#ffffff"
@@ -90,7 +93,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="#488273"
+                            android:background="#526E5E"
+                            android:gravity="center_horizontal"
                             android:padding="8dp"
                             android:text="Número de Arranchamentos"
                             android:textColor="#ffffff"
@@ -103,7 +107,7 @@
                 android:id="@+id/loadingTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_margin="20dp"
                 android:gravity="center"
                 android:text="Carregando tabela..."
                 android:textColor="#f3ecd6"
