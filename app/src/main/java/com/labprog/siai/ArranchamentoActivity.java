@@ -122,11 +122,15 @@ public class ArranchamentoActivity extends AppCompatActivity {
                         String jsonResponse = response.body().string();
                         Log.d("ArranchamentoActivity", "JSON Recebido: " + jsonResponse);
                         JSONArray jsonArray = new JSONArray(jsonResponse);
+                        arranchadosMap.clear(); // Limpar o mapa antes de adicionar novos dados
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject obj = jsonArray.getJSONObject(i);
                             String date = obj.getString("data");
                             String meal = obj.getString("refeicao").toLowerCase(Locale.ROOT);
-                            String key = date + "_" + meal;
+
+                            // Converte o tipo de refeição para um índice numérico
+                            int mealIndex = getRefeicaoIndex(meal);
+                            String key = formatDateString(date) + "_" + mealIndex;
                             arranchadosMap.put(key, true);
                             Log.d("ArranchamentoActivity", "Adicionado ao mapa: " + key);
                         }
@@ -145,6 +149,35 @@ public class ArranchamentoActivity extends AppCompatActivity {
                 Toast.makeText(ArranchamentoActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // Método para converter a data para o formato correto
+    private String formatDateString(String date) {
+        SimpleDateFormat fromUser = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat myFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        try {
+            return myFormat.format(fromUser.parse(date));
+        } catch (ParseException e) {
+            Log.e("ArranchamentoActivity", "Erro ao formatar data: " + date, e);
+            return date; // Retorna a data original em caso de erro
+        }
+    }
+
+
+
+    private int getRefeicaoIndex(String meal) {
+        switch (meal) {
+            case "cafe":
+                return 1;
+            case "almoco":
+                return 2;
+            case "janta":
+                return 3;
+            case "ceia":
+                return 4;
+            default:
+                throw new IllegalArgumentException("Tipo de refeição desconhecido: " + meal);
+        }
     }
 
     private void renderizarDias() {
@@ -175,7 +208,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             mealLabel.setGravity(View.TEXT_ALIGNMENT_CENTER);
             mealLabelsLayout.addView(mealLabel);
             mealLabel.setTextColor(Color.WHITE);
-            mealLabel.setPadding(0,25,40,0);
+            mealLabel.setPadding(0, 25, 40, 0);
         }
 
         weekLayout.addView(mealLabelsLayout);
@@ -186,12 +219,10 @@ public class ArranchamentoActivity extends AppCompatActivity {
             LinearLayout dayLayout = new LinearLayout(this);
             dayLayout.setOrientation(LinearLayout.VERTICAL);
 
-
             String formattedDate = String.format("%02d/%02d/%04d", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
             TextView dayText = new TextView(this);
             dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
             dayText.setTextSize(14);
-            //dayText.setTextColor(Color.WHITE); // Mudar a cor dos dias da semana para branco
             dayText.setPadding(15, 0, 0, 20);
             dayLayout.addView(dayText);
 
@@ -201,9 +232,10 @@ public class ArranchamentoActivity extends AppCompatActivity {
                 String key = formattedDate + "_" + (j + 1); // Usando índice numérico para refeição
                 mealCheckBox.setTag(key);
 
+                // Verifica o estado da checkbox usando arranchadosMap
                 Log.d("ArranchamentoActivity", "Verificando chave: " + key);
                 if (arranchadosMap.containsKey(key)) {
-                    mealCheckBox.setChecked(true);
+                    mealCheckBox.setChecked(arranchadosMap.get(key));
                     Log.d("ArranchamentoActivity", "Checkbox marcada: " + key);
                 }
 
@@ -217,8 +249,6 @@ public class ArranchamentoActivity extends AppCompatActivity {
         weeksContainer.addView(weekScrollView);
         calendar.add(Calendar.DAY_OF_WEEK, -7); // Voltar 7 dias para garantir que a contagem de semanas continue correta
     }
-
-
 
     private void carregarProximaSemana() {
         saveCheckboxStates();
@@ -237,7 +267,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             for (int d = 1; d < dayCount; d++) { // start from 1 to skip mealLabelsLayout
                 LinearLayout dayLayout = (LinearLayout) weekLayout.getChildAt(d);
                 int mealCount = dayLayout.getChildCount();
-                for (int j = 1; j < mealCount; j++) {
+                for (int j = 1; j < mealCount; j++) { // start from 1 to skip dayText
                     CheckBox mealCheckBox = (CheckBox) dayLayout.getChildAt(j);
                     String key = (String) mealCheckBox.getTag();
                     boolean isChecked = mealCheckBox.isChecked();
@@ -247,6 +277,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             }
         }
     }
+
 
     private void enviarArranchamento() {
         saveCheckboxStates();
