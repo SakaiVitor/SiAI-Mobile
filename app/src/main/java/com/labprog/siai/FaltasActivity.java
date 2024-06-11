@@ -11,7 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
@@ -41,7 +44,9 @@ public class FaltasActivity extends AppCompatActivity {
     private Spinner spinnerMeals;
     private DecoratedBarcodeView barcodeView;
     private CaptureManager captureManager;
+    private DrawerLayout drawerLayout;
     private TextView loadingTextView;
+    private NavigationView navigationView;
     private Button buttonScan;
     private boolean isProcessing = false; // Flag para rastrear se há uma resposta pendente
     private String lastScannedCode = ""; // Variável para armazenar o último QR code escaneado
@@ -59,7 +64,42 @@ public class FaltasActivity extends AppCompatActivity {
         apiService = ApiClient.getClient().create(ApiService.class);
         sessionId = getIntent().getStringExtra("sessionId");
         userId = getIntent().getStringExtra("userId");
-        Log.d("FaltasActivity", "Session ID: " + sessionId);
+
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            Intent intent;
+            switch (item.getItemId()) {
+                case R.id.itemMenu:
+                    intent = new Intent(FaltasActivity.this, MenuActivity.class);
+                    intent.putExtra("sessionId", sessionId);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemPreencher:
+                    intent = new Intent(FaltasActivity.this, ArranchamentoActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemExportar:
+                    intent = new Intent(FaltasActivity.this, ExportarActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemFaltas:
+                    intent = new Intent(FaltasActivity.this, FaltasActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemSair:
+                    logout();
+                    break;
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
 
         // Configurar o spinner com as opções de refeição
         String[] mealOptions = {"café", "almoço", "janta", "ceia"};
@@ -78,6 +118,12 @@ public class FaltasActivity extends AppCompatActivity {
 
         captureManager = new CaptureManager(this, barcodeView);
         captureManager.initializeFromIntent(getIntent(), savedInstanceState);
+    }
+
+    private void logout() {
+        Intent intent = new Intent(FaltasActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void checkLoginAndAdmin() {

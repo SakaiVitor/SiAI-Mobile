@@ -40,15 +40,13 @@ import retrofit2.Response;
 public class ExportarActivity extends AppCompatActivity {
     private EditText dataInicioField, dataFinalField, turmaField, pelotaoField;
     private Button exportarButton;
-
+    private String sessionId;
+    private String userId;
     private ApiService apiService;
-
     private static final String TAG = "ExportarActivity";
-
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
-
     private Calendar calendar;
 
 
@@ -89,15 +87,39 @@ public class ExportarActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        sessionId = getIntent().getStringExtra("sessionId");
+        userId = getIntent().getStringExtra("userId");
+
         navigationView.setNavigationItemSelectedListener(item -> {
-            if(item.getItemId()==R.id.itemMenu){
-                startActivity(new Intent(ExportarActivity.this, MenuActivity.class));
-            } else if(item.getItemId()==R.id.itemPreencher){
-                startActivity(new Intent(ExportarActivity.this, ArranchamentoActivity.class));
-            } else if (item.getItemId()==R.id.itemExportar) {
-                startActivity(new Intent(ExportarActivity.this, ExportarActivity.class));
-            }else if(item.getItemId()==R.id.itemSair){
-                logout();
+            Intent intent;
+            switch (item.getItemId()) {
+                case R.id.itemMenu:
+                    intent = new Intent(ExportarActivity.this, MenuActivity.class);
+                    intent.putExtra("sessionId", sessionId);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemPreencher:
+                    intent = new Intent(ExportarActivity.this, ArranchamentoActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemExportar:
+                    intent = new Intent(ExportarActivity.this, ExportarActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemFaltas:
+                    intent = new Intent(ExportarActivity.this, FaltasActivity.class);
+                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                    break;
+                case R.id.itemSair:
+                    logout();
+                    break;
             }
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
