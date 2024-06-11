@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,10 +20,17 @@ import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -113,23 +121,21 @@ public class ExportarActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
     private void exportar(String dataInicio, String dataFinal, String turma, String pelotao) {
-        Call<Void> call = apiService.export(dataInicio, dataFinal, turma, pelotao);
-        call.enqueue(new Callback<Void>() {
+        Call<ResponseBody> call = apiService.export(dataInicio, dataFinal, turma, pelotao);
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        //String jsonResponse = response.body();
-                        //JSONObject jsonObject = new JSONObject(jsonResponse);
-
-                        Toast.makeText(ExportarActivity.this, "Export bem-sucedido!", Toast.LENGTH_SHORT).show();
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Save the file
+                    boolean isFileSaved = saveFile(response.body(), dataInicio, dataFinal, turma, pelotao);
+                    if (isFileSaved) {
+                        Toast.makeText(ExportarActivity.this, "Export bem-sucedido! Verifique seus Downloads :)", Toast.LENGTH_SHORT).show();
                         // Redirecionar para MenuActivity
                         Intent intent = new Intent(ExportarActivity.this, MenuActivity.class);
                         startActivity(intent);
                         finish();
-                    } catch (Exception e) {
-                        Log.e("LoginActivity", "Erro ao processar JSON", e);
-                        Toast.makeText(ExportarActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ExportarActivity.this, "Erro ao salvar o arquivo", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(ExportarActivity.this, "Falha ao exportar " + response.message(), Toast.LENGTH_SHORT).show();
@@ -137,13 +143,56 @@ public class ExportarActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 exportarButton.setEnabled(true);
                 Log.e(TAG, "Erro de comunicação: ", t);
                 Toast.makeText(ExportarActivity.this, "Erro de comunicação", Toast.LENGTH_SHORT).show();
             }
 
         });
+    }
+    private boolean saveFile(ResponseBody body, String dataInicio, String dataFim, String turma, String pelotao) {
+        try {
+            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            String nomeArquivo = "T"+turma+"_P"+pelotao+"º_("+dataInicio.replaceAll("[^a-zA-Z0-9]", "-")+"&"+dataFim.replaceAll("[^a-zA-Z0-9]", "-")+").xlsx";
+            File file = new File(path, nomeArquivo);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(file);
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
+                }
+
+                outputStream.flush();
+                return true;
+            } catch (IOException e) {
+                Log.e(TAG, "Erro ao salvar o arquivo", e);
+                return false;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Erro ao salvar o arquivo", e);
+            return false;
+        }
     }
     private void logout() {
         // Limpar sessão ou qualquer dado de login aqui

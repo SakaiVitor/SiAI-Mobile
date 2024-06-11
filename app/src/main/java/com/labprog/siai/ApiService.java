@@ -28,7 +28,7 @@ public interface ApiService {
 
     @FormUrlEncoded
     @POST("export")
-    Call<Void> export(
+    Call<ResponseBody> export(
             @Field("dataInicio") String dataInicio,
             @Field("dataFim") String dataFim,
             @Field("turma") String turma,
