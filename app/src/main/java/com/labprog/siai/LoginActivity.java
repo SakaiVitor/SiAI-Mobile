@@ -23,7 +23,6 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordField;
     private Button loginButton;
     private TextView registerLink;
-
     private RelativeLayout loader;
     private ApiService apiService;
 
