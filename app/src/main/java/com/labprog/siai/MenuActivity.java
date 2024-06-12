@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-
 public class MenuActivity extends AppCompatActivity {
 
     private ApiService apiService;
@@ -49,6 +48,7 @@ public class MenuActivity extends AppCompatActivity {
     private List<String> arranchamentosHoje;
     private String qrCodeData;
     private int faltasUsuario;
+    private List<String> faltasLista;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +65,6 @@ public class MenuActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         loadingProgressBar = findViewById(R.id.loader);
-
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -120,8 +119,13 @@ public class MenuActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
+                        System.out.println("JSON Response: " + jsonResponse); // Debugging
                         JSONObject jsonObject = new JSONObject(jsonResponse);
-                        if (jsonObject.has("usuario_id") && jsonObject.has("arranchamentosHoje")) {
+
+                        // Check for the presence of required fields
+                        if (jsonObject.has("usuario_id") && jsonObject.has("arranchamentosHoje") && jsonObject.has("faltasUsuario") && jsonObject.has("faltasLista")) {
+
+                            // Parse arranchamentosHoje
                             Set<String> arranchamentosHojeSet = new HashSet<>();
                             JSONArray arranchamentosHojeArray = jsonObject.getJSONArray("arranchamentosHoje");
                             for (int i = 0; i < arranchamentosHojeArray.length(); i++) {
@@ -144,14 +148,22 @@ public class MenuActivity extends AppCompatActivity {
                                 }
                             }
 
+                            // Parse other fields
                             qrCodeData = String.valueOf(jsonObject.getInt("usuario_id"));
                             faltasUsuario = jsonObject.getInt("faltasUsuario");
+                            faltasLista = new ArrayList<>();
+                            JSONArray faltasArray = jsonObject.getJSONArray("faltasLista");
+                            for (int i = 0; i < faltasArray.length(); i++) {
+                                faltasLista.add(faltasArray.getString(i));
+                            }
+
                             setupViewPagerAndTabs();
                         } else {
                             Toast.makeText(MenuActivity.this, "Erro ao processar dados: JSON inesperado", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Toast.makeText(MenuActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace(); // Print stack trace for debugging
                     }
                 } else {
                     Toast.makeText(MenuActivity.this, "Erro ao obter dados: " + response.message(), Toast.LENGTH_SHORT).show();
@@ -159,11 +171,11 @@ public class MenuActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.GONE);
             }
 
-
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 loadingProgressBar.setVisibility(View.GONE);
                 Toast.makeText(MenuActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
+                t.printStackTrace(); // Print stack trace for debugging
             }
         });
     }
@@ -191,6 +203,10 @@ public class MenuActivity extends AppCompatActivity {
                 tab.setCustomView(adapter.getTabView(i));
             }
         }
+    }
+
+    public List<String> getfaltasLista() {
+        return faltasLista;
     }
 
     public List<String> getArranchamentosHoje() {

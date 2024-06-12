@@ -4,34 +4,29 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FaltasFragment extends Fragment {
 
-    private TextView textViewFaltas;
+    private TextView textViewFaltasTotal;
+    private LinearLayout linearLayoutFaltas;
 
     @Nullable
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_faltas, container, false);
-        textViewFaltas = view.findViewById(R.id.textViewFaltas);
+        textViewFaltasTotal = view.findViewById(R.id.textViewFaltasTotal);
+        linearLayoutFaltas = view.findViewById(R.id.linearLayoutFaltas);
         return view;
     }
 
@@ -42,15 +37,35 @@ public class FaltasFragment extends Fragment {
         MenuActivity activity = (MenuActivity) getActivity();
         if (activity != null) {
             int faltasUsuario = activity.getFaltasUsuario();
-            String faltasText = "Faltas no rancho até " + getFormattedDate() + ": " + faltasUsuario;
-            textViewFaltas.setText(faltasText);
+            String faltasText = "Faltas no rancho até ontem: " + faltasUsuario;
+            textViewFaltasTotal.setText(faltasText);
+
+            List<String> faltasLista = activity.getfaltasLista();
+
+            // Remover duplicatas usando um LinkedHashSet para manter a ordem
+            Set<String> faltasSet = new LinkedHashSet<>(faltasLista);
+
+            // Reverse the list to show from last to first
+            for (String falta : faltasSet) {
+                String formattedFalta = formatFalta(falta);
+                addFaltaToLayout(formattedFalta);
+            }
         }
     }
 
-    private String getFormattedDate() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        return sdf.format(calendar.getTime());
+    private void addFaltaToLayout(String formattedFalta) {
+        TextView textViewFalta = new TextView(getContext());
+        textViewFalta.setText(formattedFalta);
+        textViewFalta.setTextSize(24);
+        textViewFalta.setTextColor(getResources().getColor(android.R.color.white)); // Set text color to white
+        textViewFalta.setPadding(8, 8, 8, 8);
+        linearLayoutFaltas.addView(textViewFalta);
+    }
+
+    private String formatFalta(String falta) {
+        String[] parts = falta.split("_");
+        String date = parts[0];
+        String tipo = parts[1];
+        return date + ": " + tipo;
     }
 }

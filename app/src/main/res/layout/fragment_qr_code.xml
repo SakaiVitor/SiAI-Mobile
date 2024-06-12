@@ -7,9 +7,19 @@
     android:background="#2D3E3F"
     android:gravity="center">
 
+    <TextView
+        android:id="@+id/textViewQRCodeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QR Code de Identificação"
+        android:textSize="32sp"
+        android:textColor="@android:color/white"
+        android:paddingBottom="16dp"
+        android:gravity="center"/>
+
     <ImageView
         android:id="@+id/imageViewQR"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:contentDescription="QR Code" />
 </LinearLayout>

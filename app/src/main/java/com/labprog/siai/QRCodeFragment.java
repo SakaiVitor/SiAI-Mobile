@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,11 +21,13 @@ import org.jetbrains.annotations.NotNull;
 public class QRCodeFragment extends Fragment {
 
     private ImageView imageViewQR;
+    private TextView textViewQRCodeTitle;
 
     @Nullable
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_qr_code, container, false);
+        textViewQRCodeTitle = view.findViewById(R.id.textViewQRCodeTitle);
         imageViewQR = view.findViewById(R.id.imageViewQR);
         return view;
     }
