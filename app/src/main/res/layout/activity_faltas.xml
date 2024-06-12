@@ -36,7 +36,8 @@
                 android:layout_height="44dp"
                 android:background="@drawable/edit_text_background"
                 android:padding="8dp"
-                android:popupBackground="@drawable/edit_text_background" />
+                android:popupBackground="@drawable/edit_text_background"
+                />
         </androidx.cardview.widget.CardView>
 
         <LinearLayout

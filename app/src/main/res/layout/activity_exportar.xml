@@ -99,7 +99,8 @@
                 android:hint="25"
                 android:inputType="number"
                 android:padding="10dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:textColorHint="#CCCCCC"/>
 
             <!-- Pelotão Field -->
             <TextView
@@ -107,7 +108,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Pelotão:"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:textColorHint="#CCCCCC"/>
 
             <EditText
                 android:id="@+id/pelotao"
@@ -119,7 +121,8 @@
                 android:hint="1"
                 android:inputType="number"
                 android:padding="10dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:textColorHint="#CCCCCC"/>
 
             <!-- Export Button -->
             <Button
@@ -142,5 +145,19 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:menu="@menu/menu_principal" />
+
+    <RelativeLayout
+        android:id="@+id/loader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:gravity="center">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </RelativeLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>

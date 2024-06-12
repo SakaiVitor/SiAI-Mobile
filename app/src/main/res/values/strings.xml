@@ -5,7 +5,7 @@
     <string name="Sair">Sair</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="cadastrar">Cadastrar</string>
+    <string name="cadastrar"><u>Cadastrar</u></string>
     <string-array name="meals_array">
         <item>Café</item>
         <item>Almoço</item>

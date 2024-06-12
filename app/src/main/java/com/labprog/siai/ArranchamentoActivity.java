@@ -236,7 +236,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             mealLabel.setGravity(View.TEXT_ALIGNMENT_CENTER);
             mealLabelsLayout.addView(mealLabel);
             mealLabel.setTextColor(Color.WHITE);
-            mealLabel.setPadding(0, 34, 40, 0);
+            mealLabel.setPadding(0, 40, 40, 0);
         }
 
         weekLayout.addView(mealLabelsLayout);
@@ -265,7 +265,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
                 CheckBox mealCheckBox = new CheckBox(this);
                 mealCheckBox.setScaleX(1.5f);
                 mealCheckBox.setScaleY(1.5f);
-                mealCheckBox.setPadding(40, 28, 10, 10);
+                mealCheckBox.setPadding(50, 28, 10, 10);
                 String key = fullDate + "_" + (j + 1);
                 mealCheckBox.setTag(key);
 

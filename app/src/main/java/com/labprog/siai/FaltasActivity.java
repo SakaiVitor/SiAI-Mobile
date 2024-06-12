@@ -1,9 +1,11 @@
 package com.labprog.siai;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -113,7 +115,26 @@ public class FaltasActivity extends AppCompatActivity {
 
         // Configurar o spinner com as opções de refeição
         String[] mealOptions = {"Café", "Almoço", "Janta", "Ceia"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mealOptions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mealOptions) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                // Use the default layout for the Spinner item
+                View view = super.getView(position, convertView, parent);
+                TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                textView.setTextColor(Color.WHITE); // Change text color to white
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                // Use the default layout for the dropdown item
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = (TextView) view.findViewById(android.R.id.text1);
+                textView.setTextColor(Color.WHITE); // Change text color to white
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMeals.setAdapter(adapter);
 
