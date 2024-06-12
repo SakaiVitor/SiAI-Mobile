@@ -251,7 +251,7 @@ public class ExportarActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.sakai)  // Verifique se este ícone existe no res/drawable
+                .setSmallIcon(R.drawable.icon)  // Verifique se este ícone existe no res/drawable
                 .setContentTitle("Download concluído")
                 .setContentText("Clique para abrir o arquivo")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
