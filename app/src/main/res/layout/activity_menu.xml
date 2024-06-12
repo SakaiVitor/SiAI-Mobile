@@ -33,7 +33,7 @@
                 android:fontFamily="sans-serif"
                 android:gravity="center"
                 android:paddingTop="40dp"
-                android:text="Refeições de Hoje"
+                android:text="Refeições do Dia"
                 android:textColor="#ffffff"
                 android:textSize="24sp"
                 android:textStyle="bold" />

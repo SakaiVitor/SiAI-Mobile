@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="30sp"
             android:text="Exportar arranchamento"
+            android:textStyle="bold"
             android:textAlignment="center"
             android:textColor="#ffffff"
             android:textSize="28sp" />
