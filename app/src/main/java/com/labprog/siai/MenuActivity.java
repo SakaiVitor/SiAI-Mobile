@@ -35,6 +35,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -49,12 +50,13 @@ public class MenuActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
+    private TextView textViewFaltas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-
+        textViewFaltas = findViewById(R.id.textViewFaltas);
         textViewRefeicoes = findViewById(R.id.textViewRefeicoes);
         imageViewQR = findViewById(R.id.imageViewQR);
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
@@ -127,8 +129,8 @@ public class MenuActivity extends AppCompatActivity {
                         if (jsonObject.has("usuario_id") && jsonObject.has("arranchamentosHoje")) {
                             int usuarioId = jsonObject.getInt("usuario_id");
                             JSONArray arranchamentosHoje = jsonObject.getJSONArray("arranchamentosHoje");
-
-                            displayMenuData(usuarioId, arranchamentosHoje);
+                            int faltas = jsonObject.getInt("faltasUsuario");
+                            displayMenuData(usuarioId, arranchamentosHoje, faltas);
                         } else {
                             Log.e("MenuActivity", "JSON inesperado: " + jsonResponse);
                             Toast.makeText(MenuActivity.this, "Erro ao processar dados: JSON inesperado", Toast.LENGTH_SHORT).show();
@@ -151,7 +153,8 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje) throws JSONException {
+    private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje, int faltas) throws JSONException {
+        // Construir a string de refeições
         StringBuilder refeicoesBuilder = new StringBuilder();
         for (int i = 0; i < arranchamentosHoje.length(); i++) {
             String refeicao = arranchamentosHoje.getString(i);
@@ -161,10 +164,23 @@ public class MenuActivity extends AppCompatActivity {
         }
         textViewRefeicoes.setText(refeicoesBuilder.toString());
 
+        // Gerar e exibir o QR code
         Bitmap qrCodeBitmap = generateQRCode(String.valueOf(usuarioId));
         if (qrCodeBitmap != null) {
             imageViewQR.setImageBitmap(qrCodeBitmap);
         }
+
+        // Exibir o número de faltas acumuladas
+        String faltasText = "Faltas no rancho até " + getFormattedDate() + ": " + faltas;
+        textViewFaltas.setText(faltasText);
+    }
+
+    // Método auxiliar para formatar a data de ontem
+    private String getFormattedDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(calendar.getTime());
     }
 
     private Bitmap generateQRCode(String text) {

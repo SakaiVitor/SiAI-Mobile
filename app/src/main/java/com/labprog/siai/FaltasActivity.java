@@ -112,7 +112,7 @@ public class FaltasActivity extends AppCompatActivity {
         });
 
         // Configurar o spinner com as opções de refeição
-        String[] mealOptions = {"café", "almoço", "janta", "ceia"};
+        String[] mealOptions = {"Café", "Almoço", "Janta", "Ceia"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mealOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMeals.setAdapter(adapter);
