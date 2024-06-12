@@ -10,7 +10,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -66,6 +68,13 @@ public class FaltasActivity extends AppCompatActivity {
         sessionId = getIntent().getStringExtra("sessionId");
         userId = getIntent().getStringExtra("userId");
 
+        Toolbar toolbar = findViewById(R.id.toolbar); // Inicializar Toolbar
+        setSupportActionBar(toolbar); // Configurar Toolbar como ActionBar
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
 
         navigationView.setNavigationItemSelectedListener(item -> {
             Intent intent;
