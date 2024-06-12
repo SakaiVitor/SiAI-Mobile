@@ -14,8 +14,8 @@
         android:id="@+id/itemExportar"
         app:showAsAction="never" />
     <item
-        android:id="@+id/itemFaltas"
-        android:title="Faltas" />
+        android:title="Faltas"
+        android:id="@+id/itemFaltas"/>
     <item
         android:title="@string/Sair"
         android:id="@+id/itemSair"

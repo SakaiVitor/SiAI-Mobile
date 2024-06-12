@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class ApiClient {
 
-    private static final String BASE_URL = "http://172.15.5.135:8080/";
+    private static final String BASE_URL = "http://192.168.1.2:8080/";
     private static Retrofit retrofit = null;
 
     private static Set<String> cookies = new HashSet<>();

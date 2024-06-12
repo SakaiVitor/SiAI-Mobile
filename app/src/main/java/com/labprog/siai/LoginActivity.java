@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +23,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordField;
     private Button loginButton;
     private TextView registerLink;
+
+    private RelativeLayout loader;
     private ApiService apiService;
 
     @Override
@@ -32,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.login_button);
         registerLink = findViewById(R.id.register_link);
+        loader = findViewById(R.id.loader);
         apiService = ApiClient.getClient().create(ApiService.class);
 
         loginButton.setOnClickListener(v -> {
@@ -51,10 +56,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login(String email, String password) {
+        loader.setVisibility(View.VISIBLE);
         Call<ResponseBody> call = apiService.login(email, password, "true");
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                loader.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();

@@ -212,7 +212,7 @@ public class ArranchamentoActivity extends AppCompatActivity {
             mealLabel.setGravity(View.TEXT_ALIGNMENT_CENTER);
             mealLabelsLayout.addView(mealLabel);
             mealLabel.setTextColor(Color.WHITE);
-            mealLabel.setPadding(0, 25, 40, 0);
+            mealLabel.setPadding(0, 34, 40, 0);
         }
 
         weekLayout.addView(mealLabelsLayout);
