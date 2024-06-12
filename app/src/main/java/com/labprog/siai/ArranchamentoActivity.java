@@ -258,14 +258,14 @@ public class ArranchamentoActivity extends AppCompatActivity {
             dayText.setText(String.format("%s\n%s", diasDaSemana[calendar.get(Calendar.DAY_OF_WEEK) - 1], formattedDate));
             dayText.setTextSize(16);
             dayText.setTextColor(Color.WHITE);
-            dayText.setPadding(5, 10, 5, 20);
+            dayText.setPadding(5, 10, 5, 30);
             dayLayout.addView(dayText);
 
             for (int j = 0; j < meals.length; j++) {
                 CheckBox mealCheckBox = new CheckBox(this);
                 mealCheckBox.setScaleX(1.5f);
                 mealCheckBox.setScaleY(1.5f);
-                mealCheckBox.setPadding(40, 10, 10, 10);
+                mealCheckBox.setPadding(40, 28, 10, 10);
                 String key = fullDate + "_" + (j + 1);
                 mealCheckBox.setTag(key);
 
