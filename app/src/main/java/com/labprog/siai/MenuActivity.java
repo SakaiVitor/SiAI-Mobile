@@ -3,31 +3,23 @@ package com.labprog.siai;
 import static android.app.ProgressDialog.show;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
-
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
+import com.google.android.material.tabs.TabLayout;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -35,31 +27,33 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 
 public class MenuActivity extends AppCompatActivity {
 
     private ApiService apiService;
-    private TextView textViewRefeicoes;
-    private ProgressBar loadingProgressBar;
-    private ImageView imageViewQR;
     private String sessionId;
     private String userId;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
-    private TextView textViewFaltas;
+    private RelativeLayout loadingProgressBar;
+    private List<String> arranchamentosHoje;
+    private String qrCodeData;
+    private int faltasUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        textViewFaltas = findViewById(R.id.textViewFaltas);
-        textViewRefeicoes = findViewById(R.id.textViewRefeicoes);
-        imageViewQR = findViewById(R.id.imageViewQR);
-        loadingProgressBar = findViewById(R.id.loadingProgressBar);
 
         apiService = ApiClient.getClient().create(ApiService.class);
         sessionId = getIntent().getStringExtra("sessionId");
@@ -70,6 +64,8 @@ public class MenuActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
+        loadingProgressBar = findViewById(R.id.loader);
+
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -86,19 +82,19 @@ public class MenuActivity extends AppCompatActivity {
                     break;
                 case R.id.itemPreencher:
                     intent = new Intent(MenuActivity.this, ArranchamentoActivity.class);
-                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("sessionId", sessionId);
                     intent.putExtra("userId", userId);
                     startActivity(intent);
                     break;
                 case R.id.itemExportar:
                     intent = new Intent(MenuActivity.this, ExportarActivity.class);
-                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("sessionId", sessionId);
                     intent.putExtra("userId", userId);
                     startActivity(intent);
                     break;
                 case R.id.itemFaltas:
                     intent = new Intent(MenuActivity.this, FaltasActivity.class);
-                    intent.putExtra("sessionId", sessionId);  // Passe o sessionId
+                    intent.putExtra("sessionId", sessionId);
                     intent.putExtra("userId", userId);
                     startActivity(intent);
                     break;
@@ -110,100 +106,103 @@ public class MenuActivity extends AppCompatActivity {
             return true;
         });
 
-        getMenuData();
+        loadMenuData();
     }
 
-    private void getMenuData() {
+    private void loadMenuData() {
+        loadingProgressBar.setVisibility(View.VISIBLE);
         String todayDate = getTodayDateInSqlFormat();
-        boolean fromApp = true; // Adicione o parâmetro fromApp
+        boolean fromApp = true;
         Call<ResponseBody> call = apiService.getMenuData(todayDate, sessionId, fromApp);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                loadingProgressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
-                        Log.d("MenuActivity", "JSON Response: " + jsonResponse);
                         JSONObject jsonObject = new JSONObject(jsonResponse);
                         if (jsonObject.has("usuario_id") && jsonObject.has("arranchamentosHoje")) {
-                            int usuarioId = jsonObject.getInt("usuario_id");
-                            JSONArray arranchamentosHoje = jsonObject.getJSONArray("arranchamentosHoje");
-                            int faltas = jsonObject.getInt("faltasUsuario");
-                            displayMenuData(usuarioId, arranchamentosHoje, faltas);
+                            Set<String> arranchamentosHojeSet = new HashSet<>();
+                            JSONArray arranchamentosHojeArray = jsonObject.getJSONArray("arranchamentosHoje");
+                            for (int i = 0; i < arranchamentosHojeArray.length(); i++) {
+                                arranchamentosHojeSet.add(arranchamentosHojeArray.getString(i));
+                            }
+
+                            // Mapping names
+                            Map<String, String> nameMapping = new HashMap<>();
+                            nameMapping.put("cafe", "Café");
+                            nameMapping.put("almoco", "Almoço");
+                            nameMapping.put("janta", "Janta");
+                            nameMapping.put("ceia", "Ceia");
+
+                            // Replace names
+                            arranchamentosHoje = new ArrayList<>();
+                            for (String arranchamento : arranchamentosHojeSet) {
+                                String displayName = nameMapping.get(arranchamento);
+                                if (displayName != null) {
+                                    arranchamentosHoje.add(displayName);
+                                }
+                            }
+
+                            qrCodeData = String.valueOf(jsonObject.getInt("usuario_id"));
+                            faltasUsuario = jsonObject.getInt("faltasUsuario");
+                            setupViewPagerAndTabs();
                         } else {
-                            Log.e("MenuActivity", "JSON inesperado: " + jsonResponse);
                             Toast.makeText(MenuActivity.this, "Erro ao processar dados: JSON inesperado", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
-                        Log.e("MenuActivity", "Erro ao processar JSON", e);
                         Toast.makeText(MenuActivity.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(MenuActivity.this, "Erro ao obter dados: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
+                loadingProgressBar.setVisibility(View.GONE);
             }
+
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 loadingProgressBar.setVisibility(View.GONE);
-                Log.e("MenuActivity", "Erro de rede", t);
                 Toast.makeText(MenuActivity.this, "Erro de rede", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje, int faltas) throws JSONException {
-        // Construir a string de refeições
-        StringBuilder refeicoesBuilder = new StringBuilder();
-        if (arranchamentosHoje.length() == 0) {
-            refeicoesBuilder.append("Nenhuma refeição hoje.\n");
-        } else {
-            for (int i = 0; i < arranchamentosHoje.length(); i++) {
-                String refeicao = arranchamentosHoje.getString(i);
-                if (!refeicoesBuilder.toString().contains(refeicao)) {
-                    refeicoesBuilder.append(refeicao).append("\n");
-                }
+    private void setupViewPagerAndTabs() {
+        ViewPager viewPager = findViewById(R.id.viewPager);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), this);
+
+        ArranchamentosFragment arranchamentosFragment = new ArranchamentosFragment();
+        QRCodeFragment qrCodeFragment = new QRCodeFragment();
+        FaltasFragment faltasFragment = new FaltasFragment();
+
+        adapter.addFragment(arranchamentosFragment, "Arranchamentos", R.drawable.qr);
+        adapter.addFragment(qrCodeFragment, "QR Code", R.drawable.ar);
+        adapter.addFragment(faltasFragment, "Faltas", R.drawable.falta);
+
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
+
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null) {
+                tab.setCustomView(adapter.getTabView(i));
             }
         }
-
-        textViewRefeicoes.setText(refeicoesBuilder.toString());
-
-        // Gerar e exibir o QR code
-        Bitmap qrCodeBitmap = generateQRCode(String.valueOf(usuarioId));
-        if (qrCodeBitmap != null) {
-            imageViewQR.setImageBitmap(qrCodeBitmap);
-        }
-
-        // Exibir o número de faltas acumuladas
-        String faltasText = "Faltas no rancho até " + getFormattedDate() + ": " + faltas;
-        textViewFaltas.setText(faltasText);
     }
 
-    // Método auxiliar para formatar a data de ontem
-    private String getFormattedDate() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        return sdf.format(calendar.getTime());
+    public List<String> getArranchamentosHoje() {
+        return arranchamentosHoje;
     }
 
-    private Bitmap generateQRCode(String text) {
-        try {
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, 600, 600);
-            int width = bitMatrix.getWidth();
-            int height = bitMatrix.getHeight();
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    bitmap.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
-                }
-            }
-            return bitmap;
-        } catch (WriterException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public String getQrCodeData() {
+        return qrCodeData;
+    }
+
+    public int getFaltasUsuario() {
+        return faltasUsuario;
     }
 
     private String getTodayDateInSqlFormat() {
