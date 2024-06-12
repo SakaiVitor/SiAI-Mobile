@@ -1,12 +1,20 @@
 package com.labprog.siai;
 
 import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -174,12 +182,14 @@ public class ExportarActivity extends AppCompatActivity {
 
         });
     }
+    private static final String CHANNEL_ID = "download_channel";
+
     private boolean saveFile(ResponseBody body, String dataInicio, String dataFim, String turma, String pelotao) {
         Date date = new Date();
         long timestamp = date.getTime();
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            String nomeArquivo = "T"+turma+"_P"+pelotao+"º_("+dataInicio.replaceAll("[^a-zA-Z0-9]", "-")+"&"+dataFim.replaceAll("[^a-zA-Z0-9]", "-")+")"+timestamp+".xlsx";
+            String nomeArquivo = "T" + turma + "_P" + pelotao + "º_(" + dataInicio.replaceAll("[^a-zA-Z0-9]", "-") + "&" + dataFim.replaceAll("[^a-zA-Z0-9]", "-") + ")" + timestamp + ".xlsx";
             File file = new File(path, nomeArquivo);
 
             InputStream inputStream = null;
@@ -200,6 +210,7 @@ public class ExportarActivity extends AppCompatActivity {
                 }
 
                 outputStream.flush();
+                showDownloadNotification(file);
                 return true;
             } catch (IOException e) {
                 Log.e(TAG, "Erro ao salvar o arquivo", e);
@@ -217,6 +228,43 @@ public class ExportarActivity extends AppCompatActivity {
             return false;
         }
     }
+
+    private void showDownloadNotification(File file) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Download Notifications",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Notificações para downloads concluídos");
+            notificationManager.createNotificationChannel(channel);
+            Log.d(TAG, "Notification channel created");
+        }
+
+        Uri fileUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(fileUri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.sakai)  // Verifique se este ícone existe no res/drawable
+                .setContentTitle("Download concluído")
+                .setContentText("Clique para abrir o arquivo")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        Log.d(TAG, "Sending notification");
+        notificationManager.notify(1, builder.build());
+        Log.d(TAG, "Notification sent");
+    }
+
+
+
     private void logout() {
         // Limpar sessão ou qualquer dado de login aqui
         Intent intent = new Intent(ExportarActivity.this, LoginActivity.class);
