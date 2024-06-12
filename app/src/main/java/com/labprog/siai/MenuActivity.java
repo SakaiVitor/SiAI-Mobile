@@ -156,12 +156,17 @@ public class MenuActivity extends AppCompatActivity {
     private void displayMenuData(int usuarioId, JSONArray arranchamentosHoje, int faltas) throws JSONException {
         // Construir a string de refeições
         StringBuilder refeicoesBuilder = new StringBuilder();
-        for (int i = 0; i < arranchamentosHoje.length(); i++) {
-            String refeicao = arranchamentosHoje.getString(i);
-            if (!refeicoesBuilder.toString().contains(refeicao)) {
-                refeicoesBuilder.append(refeicao).append("\n");
+        if (arranchamentosHoje.length() == 0) {
+            refeicoesBuilder.append("Nenhuma refeição hoje.\n");
+        } else {
+            for (int i = 0; i < arranchamentosHoje.length(); i++) {
+                String refeicao = arranchamentosHoje.getString(i);
+                if (!refeicoesBuilder.toString().contains(refeicao)) {
+                    refeicoesBuilder.append(refeicao).append("\n");
+                }
             }
         }
+
         textViewRefeicoes.setText(refeicoesBuilder.toString());
 
         // Gerar e exibir o QR code
