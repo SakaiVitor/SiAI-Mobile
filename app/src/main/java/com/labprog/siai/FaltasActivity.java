@@ -55,7 +55,8 @@ public class FaltasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_faltas);
-
+        drawerLayout = findViewById(R.id.drawerLayout); // Inicialize o DrawerLayout
+        navigationView = findViewById(R.id.navigationView); // Inicialize o NavigationView
         spinnerMeals = findViewById(R.id.spinnerMeals);
         barcodeView = findViewById(R.id.barcodeView);
         loadingTextView = findViewById(R.id.loadingTextView);
