@@ -160,7 +160,7 @@ public class ExportarActivity extends AppCompatActivity {
                     // Save the file
                     boolean isFileSaved = saveFile(response.body(), dataInicio, dataFinal, turma, pelotao);
                     if (isFileSaved) {
-                        Toast.makeText(ExportarActivity.this, "Export bem-sucedido! Verifique seus Downloads :)", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ExportarActivity.this, "Export bem-sucedido!", Toast.LENGTH_SHORT).show();
                         // Redirecionar para MenuActivity
                         Intent intent = new Intent(ExportarActivity.this, MenuActivity.class);
                         startActivity(intent);
