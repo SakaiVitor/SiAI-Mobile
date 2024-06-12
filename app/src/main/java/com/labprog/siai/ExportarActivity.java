@@ -20,8 +20,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
@@ -56,6 +58,7 @@ public class ExportarActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private Toolbar toolbar;
     private Calendar calendar;
+    private RelativeLayout loader;
 
 
     @Override
@@ -70,6 +73,7 @@ public class ExportarActivity extends AppCompatActivity {
         exportarButton = findViewById(R.id.exportar);
         apiService = ApiClient.getClient().create(ApiService.class);
         calendar = Calendar.getInstance();
+        loader = findViewById(R.id.loader);
 
         dataInicioField.setOnClickListener(v -> showDatePickerDialog(dataInicioField));
         dataFinalField.setOnClickListener(v -> showDatePickerDialog(dataFinalField));
@@ -152,6 +156,7 @@ public class ExportarActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
     private void exportar(String dataInicio, String dataFinal, String turma, String pelotao) {
+        loader.setVisibility(View.VISIBLE);
         Call<ResponseBody> call = apiService.export(dataInicio, dataFinal, turma, pelotao);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
