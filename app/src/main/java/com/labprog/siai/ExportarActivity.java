@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +14,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -60,6 +63,9 @@ public class ExportarActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private Calendar calendar;
     private RelativeLayout loader;
+
+    private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
+    private static final String CHANNEL_ID = "download_channel";
 
 
     @Override
@@ -138,7 +144,9 @@ public class ExportarActivity extends AppCompatActivity {
             return true;
         });
         checkIfAdmin();
+        checkNotificationPermission();
     }
+
     private void showDatePickerDialog(EditText editText) {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -156,6 +164,7 @@ public class ExportarActivity extends AppCompatActivity {
 
         datePickerDialog.show();
     }
+
     private void exportar(String dataInicio, String dataFinal, String turma, String pelotao) {
         loader.setVisibility(View.VISIBLE);
         Call<ResponseBody> call = apiService.export(dataInicio, dataFinal, turma, pelotao);
@@ -188,7 +197,6 @@ public class ExportarActivity extends AppCompatActivity {
 
         });
     }
-    private static final String CHANNEL_ID = "download_channel";
 
     private boolean saveFile(ResponseBody body, String dataInicio, String dataFim, String turma, String pelotao) {
         Date date = new Date();
@@ -298,7 +306,6 @@ public class ExportarActivity extends AppCompatActivity {
                 }
             }
 
-
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(ExportarActivity.this, "Erro de rede ao verificar admin", Toast.LENGTH_SHORT).show();
@@ -307,12 +314,30 @@ public class ExportarActivity extends AppCompatActivity {
         });
     }
 
-
     private void logout() {
         // Limpar sessão ou qualquer dado de login aqui
         Intent intent = new Intent(ExportarActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
-}
 
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATION_PERMISSION);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Notification permission granted");
+            } else {
+                Toast.makeText(this, "Permissão para notificações negada", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+}
