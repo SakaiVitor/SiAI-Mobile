@@ -199,6 +199,7 @@ public class FaltasActivity extends AppCompatActivity {
         Toast.makeText(FaltasActivity.this, message, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(FaltasActivity.this, MenuActivity.class);
         intent.putExtra("sessionId", sessionId);
+        intent.putExtra("userId", userId);
         startActivity(intent);
         finish();
     }

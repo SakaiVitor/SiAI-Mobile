@@ -36,11 +36,12 @@ public class FaltasFragment extends Fragment {
 
         MenuActivity activity = (MenuActivity) getActivity();
         if (activity != null) {
+            List<String> faltasLista = activity.getfaltasLista();
             int faltasUsuario = activity.getFaltasUsuario();
-            String faltasText = "Faltas no rancho até ontem: " + faltasUsuario;
+            String faltasText = "Faltas no rancho até ontem: " + faltasLista.size() / 2;
             textViewFaltasTotal.setText(faltasText);
 
-            List<String> faltasLista = activity.getfaltasLista();
+
 
             // Remover duplicatas usando um LinkedHashSet para manter a ordem
             Set<String> faltasSet = new LinkedHashSet<>(faltasLista);
