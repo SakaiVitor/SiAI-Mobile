@@ -175,6 +175,7 @@ public class FaltasActivity extends AppCompatActivity {
 
                         if (!isAdmin) {
                             redirectToMenu("Você precisa ser admin para acessar esta funcionalidade.");
+
                         } else {
                             setupUI();
                         }
@@ -198,6 +199,7 @@ public class FaltasActivity extends AppCompatActivity {
     private void redirectToMenu(String message) {
         Toast.makeText(FaltasActivity.this, message, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(FaltasActivity.this, MenuActivity.class);
+        intent.putExtra("userId", userId);
         intent.putExtra("sessionId", sessionId);
         startActivity(intent);
         finish();
