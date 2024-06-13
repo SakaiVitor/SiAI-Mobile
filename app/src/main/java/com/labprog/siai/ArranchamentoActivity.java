@@ -68,7 +68,6 @@ public class ArranchamentoActivity extends AppCompatActivity {
         Button enviarButton = findViewById(R.id.enviarButton);
         Button exibirMaisButton = findViewById(R.id.exibirMaisButton);
         loader = findViewById(R.id.loader); // Inicializa o loader
-
         sessionId = getIntent().getStringExtra("sessionId");
         userId = getIntent().getStringExtra("userId");
 

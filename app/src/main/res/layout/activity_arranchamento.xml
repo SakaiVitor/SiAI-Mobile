@@ -78,19 +78,23 @@
                         android:background="#264d43"
                         android:textColor="#ffffff" />
                 </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/loader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:visibility="gone"
-                    android:indeterminate="true"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/loader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:gravity="center">
 
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </RelativeLayout>
 
     <!-- Navigation View -->
     <com.google.android.material.navigation.NavigationView

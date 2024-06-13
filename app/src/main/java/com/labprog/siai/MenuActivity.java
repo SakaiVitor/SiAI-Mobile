@@ -67,6 +67,7 @@ public class MenuActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         loadingProgressBar = findViewById(R.id.loader);
+        loadingProgressBar.setVisibility(View.VISIBLE);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -152,7 +153,6 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void loadMenuData() {
-        loadingProgressBar.setVisibility(View.VISIBLE);
         String todayDate = getTodayDateInSqlFormat();
         boolean fromApp = true;
         Call<ResponseBody> call = apiService.getMenuData(todayDate, sessionId, fromApp);
