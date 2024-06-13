@@ -54,7 +54,7 @@ public interface ApiService {
     Call<ResponseBody> getArranchamentoData(@Query("fromApp") String fromApp, @Query("sessionId") String sessionId);
 
     @GET("faltas")
-    Call<ResponseBody> isAdmin(@Query("sessionId") String sessionId);
+    Call<ResponseBody> isAdmin(@Query("userId") String userId);
 
     @FormUrlEncoded
     @POST("faltas")

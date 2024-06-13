@@ -138,7 +138,6 @@ public class FaltasActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMeals.setAdapter(adapter);
 
-        checkLoginAndAdmin();
 
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override

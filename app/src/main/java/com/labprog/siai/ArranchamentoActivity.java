@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -136,6 +137,45 @@ public class ArranchamentoActivity extends AppCompatActivity {
             }
             drawerLayout.closeDrawer(GravityCompat.START);
             return true;
+        });
+        checkIfAdmin();
+    }
+
+    private void checkIfAdmin() {
+        System.out.println(userId);
+        Call<ResponseBody> call = apiService.isAdmin(userId);
+        call.enqueue(new Callback<ResponseBody>() {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseBody = response.body().string();
+                        JSONObject jsonObject = new JSONObject(responseBody);
+
+                        // Verifique se a chave "isAdmin" está presente no JSON
+                        if (jsonObject.has("isAdmin")) {
+                            boolean isAdmin = jsonObject.getBoolean("isAdmin");
+                            if (!isAdmin) {
+                                Menu menu = navigationView.getMenu();
+                                menu.findItem(R.id.itemFaltas).setVisible(false);
+                            }
+                        } else {
+                            Toast.makeText(ArranchamentoActivity.this, "Resposta JSON não contém isAdmin", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(ArranchamentoActivity.this, "Erro ao processar dados de admin", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(ArranchamentoActivity.this, "Erro ao verificar admin: " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(ArranchamentoActivity.this, "Erro de rede ao verificar admin", Toast.LENGTH_SHORT).show();
+                t.printStackTrace();
+            }
         });
     }
 

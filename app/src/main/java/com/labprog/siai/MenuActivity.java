@@ -4,6 +4,7 @@ import static android.app.ProgressDialog.show;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -59,6 +60,7 @@ public class MenuActivity extends AppCompatActivity {
         sessionId = getIntent().getStringExtra("sessionId");
         userId = getIntent().getStringExtra("userId");
 
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -69,6 +71,8 @@ public class MenuActivity extends AppCompatActivity {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+
 
         navigationView.setNavigationItemSelectedListener(item -> {
             Intent intent;
@@ -105,7 +109,46 @@ public class MenuActivity extends AppCompatActivity {
             return true;
         });
 
+        checkIfAdmin();
         loadMenuData();
+    }
+
+    private void checkIfAdmin() {
+        System.out.println(userId);
+        Call<ResponseBody> call = apiService.isAdmin(userId);
+        call.enqueue(new Callback<ResponseBody>() {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseBody = response.body().string();
+                        JSONObject jsonObject = new JSONObject(responseBody);
+
+                        // Verifique se a chave "isAdmin" está presente no JSON
+                        if (jsonObject.has("isAdmin")) {
+                            boolean isAdmin = jsonObject.getBoolean("isAdmin");
+                            if (!isAdmin) {
+                                Menu menu = navigationView.getMenu();
+                                menu.findItem(R.id.itemFaltas).setVisible(false);
+                            }
+                        } else {
+                            Toast.makeText(MenuActivity.this, "Resposta JSON não contém isAdmin", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(MenuActivity.this, "Erro ao processar dados de admin", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(MenuActivity.this, "Erro ao verificar admin: " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(MenuActivity.this, "Erro de rede ao verificar admin", Toast.LENGTH_SHORT).show();
+                t.printStackTrace();
+            }
+        });
     }
 
     private void loadMenuData() {
